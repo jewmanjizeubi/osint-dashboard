@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>OSINT Dashboard</title>
+    </head>
+    <body>
+        <!-- Haut du site-->
+        <header>
+            <div>OSINT Dashboard</div>
+            <div>
+                <span id="clock"></span>
+            </div>
+            <div>
+                <span>SERVEUR EN LIGNE</span>
+            </div>
+        </header>
+
+        <!-- Menu gauche, a modifier pour changer les données en brut-->
+        <aside>
+            <h2>Cibles</h2>
+            <input type="text" placeholder="Rechercher une cible...">
+            <ul> <!--liste imbriquée-->
+                <li>Jean Dupont
+                    <ul><h3>Infos</h3>
+                        <li>Réseaux sociaux</li>
+                        <li>IP</li>
+                        <li>Sociétés</li>
+                    </ul>
+                </li>
+                <li>Marc Dubois
+                    <ul><h3>Infos</h3>
+                        <li>Réseaux sociaux</li>
+                        <li>IP</li>
+                        <li>Sociétés</li>
+                    </ul>
+                </li>
+            </ul>
+            <button>Nouvelle cible</button>
+        </aside>
+
+        <!--Centre du site-->
+        <main>
+            <section><!--Santé du serveur-->
+                <h2>Monitoring</h2>
+                <div>
+                    <span>CPU</span>
+                    <span id="cpu-val">0%</span><!--Mesure du CPU -->
+                </div>
+                <div>
+                    <span>RAM</span>
+                    <span id="ram-val">0%</span><!--Mesure RAM-->
+                </div>
+                <div>
+                    <span>Latence</span>
+                    <span id="latence-val">0ms</span><!--Mesure ping-->
+                </div>
+                <div>
+                    <span>Uptime</span>
+                    <span id="uptime-val">0%</span><!--Mesure uptime-->
+                </div>
+                <div>
+                    <canvas id="ecg"></canvas>
+                </div>
+            </section>
+
+            <section><!--Données récoltées par OSINT-->
+                <h2>Données</h2>
+                <table>
+                    <tr>
+                        <td>Nom-Prénom</td>
+                        <td>Jean Dupont</td>
+                    </tr>
+                    <tr>
+                        <td>téléphone</td>
+                        <td>06060606</td>
+                    </tr>
+                    <tr>
+                        <td>email</td>
+                        <td>jdupont@example.com</td>
+                    </tr>
+                </table>
+            </section>
+        </main>
+    </body>
+        </html>
