@@ -3,15 +3,17 @@
     <head>
         <meta charset="UTF-8">
         <title>OSINT Dashboard</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <!-- Haut du site-->
+         <div class="layout">
         <header>
-            <div>OSINT Dashboard</div>
-            <div>
+            <div class="topbar-logo">OSINT Dashboard</div>
+            <div class="topbar-clock">
                 <span id="clock"></span>
             </div>
-            <div>
+            <div class="topbar-status">
                 <span>SERVEUR EN LIGNE</span>
             </div>
         </header>
@@ -41,30 +43,30 @@
 
         <!--Centre du site-->
         <main>
-            <section><!--Santé du serveur-->
-                <h2>Monitoring</h2>
-                <div>
+            <h2>Monitoring</h2>
+            <section class="monitoring"><!--Santé du serveur-->
+                <div class="metric-card">
                     <span>CPU</span>
                     <span id="cpu-val">0%</span><!--Mesure du CPU -->
                 </div>
-                <div>
+                <div class="metric-card">
                     <span>RAM</span>
                     <span id="ram-val">0%</span><!--Mesure RAM-->
                 </div>
-                <div>
+                <div class="metric-card">
                     <span>Latence</span>
                     <span id="latence-val">0ms</span><!--Mesure ping-->
                 </div>
-                <div>
+                <div class="metric-card">
                     <span>Uptime</span>
                     <span id="uptime-val">0%</span><!--Mesure uptime-->
                 </div>
-                <div>
+                <div class="ecg-card">
                     <canvas id="ecg"></canvas>
                 </div>
             </section>
 
-            <section><!--Données récoltées par OSINT-->
+            <section class="donnees"><!--Données récoltées par OSINT-->
                 <h2>Données</h2>
                 <table>
                     <tr>
@@ -82,5 +84,6 @@
                 </table>
             </section>
         </main>
+        </div>
     </body>
         </html>

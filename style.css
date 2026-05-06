@@ -1,0 +1,88 @@
+:root {
+    --bg: #080c11;
+    --bleu: #4a9eca;
+    --texte: #a8cce0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--texte);
+    font-family:monospace;
+    margin: 0;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 44px 1fr;
+    height: 100vh;
+    grid-template-areas:
+        "header header"
+        "sidebar main";
+}
+
+header {
+    grid-area: header;
+    background-color: var(--bg);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #1a2d42;
+}
+
+.topbar-status {
+    margin-left: 20px;
+    color: var(--bleu);
+}
+
+.topbar-logo {
+    font-size: 16px;
+    color: var(--bleu);
+}
+
+.topbar-clock {
+    margin-left: auto;
+}
+
+aside {
+    grid-area: sidebar;
+    border-right: 1px solid #1a2d42;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+main {
+    grid-area: main;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+h2 {
+    color: var(--bleu);
+    margin-bottom: 10px;
+}
+
+.monitoring {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.metric-card {
+    background-color: #0d1520;
+    border: 1px solid #1a2d42;
+    padding: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 80px;
+}
+
+.ecg-card {
+    flex: 2;
+    background-color: #0d1520;
+    border: 1px solid #1a2d42;
+    padding: 10px;
+    height: 80px;
+}
