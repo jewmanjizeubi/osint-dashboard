@@ -1,9 +1,10 @@
+/*VARIABLES*/
 :root {
     --bg: #080c11;
     --bleu: #4a9eca;
     --texte: #a8cce0;
 }
-
+/*BODY*/
 body {
     background-color: var(--bg);
     color: var(--texte);
@@ -20,7 +21,7 @@ body {
         "header header"
         "sidebar main";
 }
-
+/*HEADER*/
 header {
     grid-area: header;
     background-color: var(--bg);
@@ -43,7 +44,7 @@ header {
 .topbar-clock {
     margin-left: auto;
 }
-
+/*MENU GAUCHE*/
 aside {
     grid-area: sidebar;
     border-right: 1px solid #1a2d42;
@@ -61,7 +62,7 @@ aside h2 {
     font-size: 13px;
     letter-spacing: 2px;
 }
-
+/*DONNEES CIBLES*/
 .cible {
     font-weight: bold;
     color: var(--bleu);
@@ -75,6 +76,23 @@ aside h2 {
     font-size: 11px;
 }
 
+.donnees table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.donnees td {
+    padding: 8px;
+    border-bottom: 1px solid #1a2d42;
+    font-size: 12px;
+}
+
+.donnees td:first-child {
+    color: var(--bleu);
+    width: 30%;
+}
+
+/*MAIN*/
 main {
     grid-area: main;
     padding: 20px;
@@ -85,7 +103,7 @@ h2 {
     color: var(--bleu);
     margin-bottom: 10px;
 }
-
+/*SUIVI STATUT SERVEUR*/
 .monitoring {
     display: flex;
     gap: 10px;
