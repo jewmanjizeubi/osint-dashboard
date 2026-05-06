@@ -51,6 +51,30 @@ aside {
     overflow-y: auto;
 }
 
+aside ul {
+    list-style: none;
+    padding-left: 10px;
+}
+
+aside h2 {
+    margin-bottom: 10px;
+    font-size: 13px;
+    letter-spacing: 2px;
+}
+
+.cible {
+    font-weight: bold;
+    color: var(--bleu);
+    margin-bottom: 6px;
+}
+
+.categorie {
+    font-weight: normal;
+    color: var(--texte);
+    padding-left: 10px;
+    font-size: 11px;
+}
+
 main {
     grid-area: main;
     padding: 20px;
