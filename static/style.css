@@ -1,11 +1,11 @@
-/*VARIABLES*/
+/*============VARIABLES============*/
 :root {
     --bg: #080c11;
     --bleu: #4a9eca;
     --texte: #a8cce0;
 }
 
-/*BODY*/
+/*============BODY============*/
 body {
     background-color: var(--bg);
     color: var(--texte);
@@ -23,7 +23,7 @@ body {
         "sidebar main";
 }
 
-/*HEADER*/
+/*============HEADER============*/
 header {
     grid-area: header;
     background-color: var(--bg);
@@ -47,7 +47,7 @@ header {
     margin-left: auto;
 }
 
-/*MENU GAUCHE*/
+/*============MENU GAUCHE============*/
 aside {
     grid-area: sidebar;
     border-right: 1px solid #1a2d42;
@@ -66,7 +66,7 @@ aside h2 {
     letter-spacing: 2px;
 }
 
-/*DONNEES CIBLES*/
+/*============DONNEES CIBLES============*/
 .cible {
     font-weight: bold;
     color: var(--bleu);
@@ -96,7 +96,7 @@ aside h2 {
     width: 30%;
 }
 
-/*MAIN*/
+/*============MAIN============*/
 main {
     grid-area: main;
     padding: 20px;
@@ -108,7 +108,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-/*SUIVI STATUT SERVEUR*/
+/*============SUIVI STATUT SERVEUR============*/
 .monitoring {
     display: flex;
     gap: 10px;
@@ -150,7 +150,7 @@ canvas {
     display: block;
 }
 
-/*POP UP FORMULAIRE*/
+/*============POP UP FORMULAIRE============*/
 .modal-overlay {
     display: none;
     position: fixed;
@@ -218,4 +218,50 @@ canvas {
 
 .modal-box button[type="submit"]:hover {
   background-color: var(--texte);
+}
+
+/*============LOGIN============*/
+.layout-login {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#login-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+    margin: auto;
+    background-color: #0d1520;
+    border: 1px solid #1a2d42;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+#login-box input {
+    background-color: #080c11;
+    border: 1px solid #1a2d42;
+    color: var(--texte);
+    font-family: monospace;
+    padding: 6px 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#login-box button {
+    background-color: var(--bleu);
+    color: #080c11;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: 1px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#login-box button:hover {
+    background-color: var(--texte);
 }
