@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>OSINT Dashboard - Login</title>
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">-->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="layout_login">
+        <header>
+            <div class="topbar-logo">OSINT Dashboard - Login</div>
+            <div class="topbar-clock">
+                <span id="clock"></span>
+            </div>
+            <div class="topbar-status">
+                <span>SERVEUR EN LIGNE</span>
+            </div>
+        </header>
+    </div>
+    <main>
+        <div id="login-box">
+            <h2>Login</h2>
+            <label>Username</label>
+            <input type="text" id="input-username" placeholder="">
+
+            <label>Password</label>
+            <input type="password" id="input-password" placeholder="">
+            <button type="submit">Connexion</button>
+        </div>
+    </main>
+    <!--SCRIPT CLOCK A INTEGRER ICI-->
+    <script src="clock.js"></script>
+</body>
+
+</html>
