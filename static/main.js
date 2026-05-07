@@ -62,6 +62,26 @@ window.onload = function () {
     btnClose.addEventListener("click", function () {
         modal.classList.remove("active");
     });
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+            modal.classList.remove("active");
+        }
+    });
+
+    document.querySelectorAll(".btn-supprimer").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const cible = btn.closest(".cible");
+            cible.remove;
+        });
+    });
+    document.querySelectorAll(".btn-supprimer").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            console.log("clic détecté");
+            const cible = this.parentElement;
+            cible.remove();
+        });
+    });
+    console.log(this.parentElement);
 }
 
 //Recherche menu gauche

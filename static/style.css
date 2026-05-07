@@ -36,6 +36,31 @@ header {
 .topbar-status {
     margin-left: 20px;
     color: var(--bleu);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #1d9e75;
+    animation: pulse-anim 2s infinite;
+}
+
+@keyframes pulse-anim {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.3;
+        transform: scale(0.7);
+    }
 }
 
 .topbar-logo {
@@ -66,11 +91,91 @@ aside h2 {
     letter-spacing: 2px;
 }
 
+#btn-nouvelle-cible {
+    width: 100%;
+    background-color: var(--bleu);
+    color: #080c11;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+#btn-nouvelle-cible:hover {
+    background-color: var(--texte);
+}
+
+#btn-nouvelle-cible:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+}
+
+#search {
+    width: 100%;
+    background-color: #080c11;
+    border: 1px solid #1a2d42;
+    color: var(--texte);
+    font-family: monospace;
+    padding: 6px 8px;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+}
+
+#search::placeholder {
+    color: var(--text-faint);
+}
+
+#search:focus {
+    outline: none;
+    border-color: var(--bleu);
+}
+
+.btn-supprimer {
+    background: transparent;
+    border: none;
+    color: #c03a3a;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 0 4px;
+    float: right;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.cible:hover .btn-supprimer {
+    opacity: 1;
+}
+
+.btn-supprimer:hover {
+    color: #ff5555;
+}
+
+aside::-webkit-scrollbar {
+    width: 4px;
+}
+
+aside::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb {
+    background-color: #1a2d42;
+    border-radius: 2px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+    background-color: var(--bleu);
+}
+
 /*============DONNEES CIBLES============*/
 .cible {
     font-weight: bold;
     color: var(--bleu);
     margin-bottom: 6px;
+    transition: color 0.2s;
 }
 
 .categorie {
@@ -78,6 +183,7 @@ aside h2 {
     color: var(--texte);
     padding-left: 10px;
     font-size: 11px;
+    transition: color 0.2s;
 }
 
 .donnees table {
@@ -106,6 +212,12 @@ main {
 h2 {
     color: var(--bleu);
     margin-bottom: 10px;
+}
+
+#no-data td {
+    color: var(--text-dim);
+    font-style: italic;
+    text-align: center;
 }
 
 /*============SUIVI STATUT SERVEUR============*/
@@ -188,36 +300,42 @@ canvas {
 }
 
 .modal-box input {
-  background-color: #080c11;
-  border: 1px solid #1a2d42;
-  color: var(--texte);
-  font-family: monospace;
-  padding: 6px 8px;
-  width: 100%;
+    background-color: #080c11;
+    border: 1px solid #1a2d42;
+    color: var(--texte);
+    font-family: monospace;
+    padding: 6px 8px;
+    width: 100%;
+    transition: color 0.2s;
+}
+
+.modal-box input:focus {
+    outline: none;
+    border-color: var(--bleu);
 }
 
 #modal-close {
-  float: right;
-  background: transparent;
-  border: none;
-  color: var(--bleu);
-  cursor: pointer;
-  font-size: 14px;
+    float: right;
+    background: transparent;
+    border: none;
+    color: var(--bleu);
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .modal-box button[type="submit"] {
-  background-color: var(--bleu);
-  color: #080c11;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  font-family: monospace;
-  font-weight: bold;
-  letter-spacing: 1px;
+    background-color: var(--bleu);
+    color: #080c11;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
 .modal-box button[type="submit"]:hover {
-  background-color: var(--texte);
+    background-color: var(--texte);
 }
 
 /*============LOGIN============*/
@@ -262,6 +380,46 @@ canvas {
     box-sizing: border-box;
 }
 
+#login-box button:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+}
+
 #login-box button:hover {
     background-color: var(--texte);
+}
+
+.login-error {
+    display: none;
+    color: #c03a3a;
+    font-size: 11px;
+    border: 1px solid #c03a3a;
+    padding: 6px 8px;
+    background-color: #1a0505;
+}
+
+.login-error.visible {
+    display: block;
+}
+
+/*============MOBILE============*/
+@media (max-width: 768px) {
+    .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 44px auto 1fr;
+    }
+
+    aside {
+        grid-area: auto;
+        border-right: none;
+        border-bottom: 1px solid #1a2d42;
+    }
+
+    .monitor-row {
+        flex-wrap: wrap;
+    }
+
+    .metric-card {
+        width: calc(50% - 5px);
+    }
 }
