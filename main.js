@@ -10,7 +10,7 @@ updateClock();
 //Fonction monitoring
 function updateMetrics() {
     const cpu = Math.round(Math.random() * 100);
-    document.getElementById("cpu-val").innerHTML = cpu +"%";
+    document.getElementById("cpu-val").innerHTML = cpu + "%";
     const ram = Math.round(Math.random() * 100);
     document.getElementById("ram-val").innerHTML = ram + "%";
     const latence = Math.round(Math.random() * 100);
@@ -21,3 +21,42 @@ function updateMetrics() {
 
 setInterval(updateMetrics, 2000);
 updateMetrics();
+
+//Graphique ECG
+const canvas = document.getElementById("ecg");
+const ctx = canvas.getContext("2d");
+
+let points = [];
+
+function drawECG() {
+    const cpuValue = parseInt(document.getElementById("cpu-val").innerHTML);
+    points.push(cpuValue);
+    if (points.length > canvas.width) {
+        points.shift;
+    }
+
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#4a9eca";
+    ctx.lineWidth = 1.5;
+
+    for (let i = 0; i < points.length; i++) {
+        if (i == 0) {
+            ctx.moveTo(i, points[i]);
+        } else {
+            ctx.lineTo(i, points[i]);
+        }
+    }
+
+    ctx.stroke();
+
+    requestAnimationFrame(drawECG);
+}
+
+window.onload = function () {
+    canvas.width = canvas.parentElement.offsetWidth - 20;
+    canvas.height = 100;
+    drawECG();
+}

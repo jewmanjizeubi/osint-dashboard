@@ -4,11 +4,12 @@
     --bleu: #4a9eca;
     --texte: #a8cce0;
 }
+
 /*BODY*/
 body {
     background-color: var(--bg);
     color: var(--texte);
-    font-family:monospace;
+    font-family: monospace;
     margin: 0;
 }
 
@@ -21,6 +22,7 @@ body {
         "header header"
         "sidebar main";
 }
+
 /*HEADER*/
 header {
     grid-area: header;
@@ -44,6 +46,7 @@ header {
 .topbar-clock {
     margin-left: auto;
 }
+
 /*MENU GAUCHE*/
 aside {
     grid-area: sidebar;
@@ -62,6 +65,7 @@ aside h2 {
     font-size: 13px;
     letter-spacing: 2px;
 }
+
 /*DONNEES CIBLES*/
 .cible {
     font-weight: bold;
@@ -103,6 +107,7 @@ h2 {
     color: var(--bleu);
     margin-bottom: 10px;
 }
+
 /*SUIVI STATUT SERVEUR*/
 .monitoring {
     display: flex;
@@ -121,10 +126,26 @@ h2 {
     height: 80px;
 }
 
+canvas {
+    display: block;
+}
+
 .ecg-card {
-    flex: 2;
     background-color: #0d1520;
     border: 1px solid #1a2d42;
     padding: 10px;
+    height: 120px;
+    width: calc(100% - 20px);
+}
+
+.ecg-card span {
+    font-size: 11px;
+    color: var(--bleu);
+}
+
+#ecg {
+    width: 100%;
     height: 80px;
+    ;
+    display: block;
 }
