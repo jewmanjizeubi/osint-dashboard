@@ -60,3 +60,20 @@ window.onload = function () {
     canvas.height = 100;
     drawECG();
 }
+
+//Recherche menu gauche
+// Recherche sidebar
+const searchInput = document.getElementById("search");
+
+searchInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+
+    document.querySelectorAll(".cible").forEach(function (cible) {
+        const nom = cible.textContent.toLowerCase();
+        if (nom.includes(query)) {
+            cible.style.display = "";
+        } else {
+            cible.style.display = "none";
+        }
+    });
+});
