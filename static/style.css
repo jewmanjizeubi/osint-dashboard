@@ -135,7 +135,7 @@ canvas {
     border: 1px solid #1a2d42;
     padding: 10px;
     height: 120px;
-    width: calc(100% - 20px);
+    width: calc(100% - 25px);
 }
 
 .ecg-card span {
@@ -148,4 +148,74 @@ canvas {
     height: 80px;
     ;
     display: block;
+}
+
+/*POP UP FORMULAIRE*/
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    background-color: #0d1520;
+    border: 1px solid #1a2d42;
+    padding: 24px;
+    width: 400px;
+}
+
+.modal-box h2 {
+    margin-bottom: 16px;
+}
+
+.modal-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-box label {
+    font-size: 11px;
+    color: var(--bleu);
+}
+
+.modal-box input {
+  background-color: #080c11;
+  border: 1px solid #1a2d42;
+  color: var(--texte);
+  font-family: monospace;
+  padding: 6px 8px;
+  width: 100%;
+}
+
+#modal-close {
+  float: right;
+  background: transparent;
+  border: none;
+  color: var(--bleu);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-box button[type="submit"] {
+  background-color: var(--bleu);
+  color: #080c11;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-family: monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.modal-box button[type="submit"]:hover {
+  background-color: var(--texte);
 }

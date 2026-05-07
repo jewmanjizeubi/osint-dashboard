@@ -59,6 +59,18 @@ window.onload = function () {
     canvas.width = canvas.parentElement.offsetWidth - 20;
     canvas.height = 100;
     drawECG();
+    //Popup formulaire nouvelle cible
+    const modal = document.getElementById("modal");
+    const btnNouvelleCible = document.getElementById("btn-nouvelle-cible");
+    const btnClose = document.getElementById("modal-close");
+
+    btnNouvelleCible.addEventListener("click", function () {
+        modal.classList.add("active");
+    });
+
+    btnClose.addEventListener("click", function () {
+        modal.classList.remove("active");
+    });
 }
 
 //Recherche menu gauche
@@ -77,3 +89,4 @@ searchInput.addEventListener("input", function () {
         }
     });
 });
+
