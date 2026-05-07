@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>OSINT Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">-->
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -52,7 +53,7 @@
                     </ul>
                 </li>
             </ul>
-            <button>Nouvelle cible</button>
+            <button id="btn-nouvelle-cible">Nouvelle cible</button>
         </aside>
 
         <!--Centre du site-->
@@ -101,7 +102,30 @@
             </section>
         </main>
     </div>
-    <script src="{{ url_for('static', filename='main.js')}}"></script>
+    <!--<script src="{{ url_for('static', filename='main.js')}}"></script>-->
+    <script src="main.js"></script>
+    <!--Popup formulaire nouvelle cible-->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Nouvelle cible</h2>
+            <button id="modal-close">X</button>
+            <form id="form-cible">
+                <label>Nom</label>
+                <input type="text" id="input-nom" placeholder="Dupont">
+
+                <label>Prénom</label>
+                <input type="text" id="input-prenom" placeholder="Jean">
+
+                <label>Email</label>
+                <input type="text" id="input-email" placeholder="jean@example.com">
+
+                <label>Téléphone</label>
+                <input type="text" id="input-tel" placeholder="06 00 00 00 00">
+
+                <button type="submit">Ajouter</button>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>
