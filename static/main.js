@@ -81,7 +81,6 @@ window.onload = function () {
             cible.remove();
         });
     });
-    console.log(this.parentElement);
 }
 
 //Recherche menu gauche

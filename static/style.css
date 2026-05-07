@@ -170,6 +170,11 @@ aside::-webkit-scrollbar-thumb:hover {
     background-color: var(--bleu);
 }
 
+#compteur-cibles {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
 /*============DONNEES CIBLES============*/
 .cible {
     font-weight: bold;
