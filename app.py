@@ -13,6 +13,17 @@ def index():
 def login():
     return render_template("login.html")
 
+import psutil
+
+@app.route("/api/metrics")
+def metrics():
+    return {
+        "cpu": psutil.cpu_percent(interval=1),
+        "ram": psutil.virtual_memory().percent,
+        "latence": 0,
+        "uptime": 99.9
+    }
+
 @app.route("/logout")
 def logout():
     session.pop("user", None)
