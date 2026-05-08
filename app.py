@@ -1,4 +1,6 @@
-from flask import Flask, render_template, redirect, url_for, session, jsonify
+from flask import Flask, render_template, redirect, url_for, session, jsonify, request
+import hashlib
+import sqlite3
 import psutil
 
 app = Flask(__name__)
@@ -10,8 +12,22 @@ def index():
         return render_template("index.html")
     return redirect(url_for("login"))
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = hashlib.sha256(request.form["password"].encode()).hexdigest()
+        
+        con = sqlite3.connect("database.db")
+        user = con.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password)).fetchone()
+        con.close()
+        
+        if user:
+            session["user"] = username
+            return redirect(url_for("index"))
+        else:
+            return render_template("login.html", error=True)
+    
     return render_template("login.html")
 
 @app.route("/api/metrics")
