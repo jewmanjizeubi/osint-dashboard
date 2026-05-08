@@ -24,13 +24,15 @@
     <main>
         <div id="login-box">
             <h2>Login</h2>
-            <label>Username</label>
-            <input type="text" id="input-username" placeholder="">
+            <form method="POST">
+                <label>Username</label>
+                <input type="text" id="input-username" name="username" placeholder="">
 
-            <label>Password</label>
-            <input type="password" id="input-password" placeholder="">
-            <div id="login-error" class="login error">Identifiants incorrects</div>
-            <button type="submit">Connexion</button>
+                <label>Password</label>
+                <input type="password" id="input-password" name="password" placeholder="">
+                <div id="login-error" class="login error">Identifiants incorrects</div>
+                <button type="submit">Connexion</button>
+            </form>
         </div>
     </main>
     <!--SCRIPT CLOCK A INTEGRER ICI-->
