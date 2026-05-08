@@ -5,39 +5,42 @@
     <meta charset="UTF-8">
     <title>OSINT Dashboard - Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!--<link rel="stylesheet" href="style.css">-->
 </head>
 
 <body>
-    <div class="layout_login">
+    <div class="layout-login">
         <header>
-            <div class="topbar-logo">OSINT Dashboard - Login</div>
+            <div class="topbar-logo">OSINT Dashboard</div>
             <div class="topbar-clock">
                 <span id="clock"></span>
             </div>
             <div class="topbar-status">
-                <span>SERVEUR EN LIGNE</span>
                 <span class="pulse-dot"></span>
+                <span>SERVEUR EN LIGNE</span>
             </div>
         </header>
-    </div>
-    <main>
-        <div id="login-box">
-            <h2>Login</h2>
-            <form method="POST">
-                <label>Username</label>
-                <input type="text" id="input-username" name="username" placeholder="">
+        <main>
+            <div id="login-box">
+                <h2>Connexion</h2>
+                <form method="POST">
+                    <label>Identifiant</label>
+                    <input type="text" name="username" placeholder="" autocomplete="username" required>
 
-                <label>Password</label>
-                <input type="password" id="input-password" name="password" placeholder="">
-                <div id="login-error" class="login error">Identifiants incorrects</div>
-                <button type="submit">Connexion</button>
-            </form>
-        </div>
-    </main>
-    <!--SCRIPT CLOCK A INTEGRER ICI-->
+                    <label>Mot de passe</label>
+                    <input type="password" name="password" placeholder="" autocomplete="current-password" required>
+
+                    {% if error %}
+                    <div class="login-error visible">Identifiants incorrects</div>
+                    {% else %}
+                    <div class="login-error"></div>
+                    {% endif %}
+
+                    <button type="submit">Connexion</button>
+                </form>
+            </div>
+        </main>
+    </div>
     <script src="{{ url_for('static', filename='clock.js') }}"></script>
-    <!--<script src="clock.js"></script>-->
 </body>
 
 </html>

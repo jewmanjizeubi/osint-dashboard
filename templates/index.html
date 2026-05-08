@@ -5,11 +5,9 @@
     <meta charset="UTF-8">
     <title>OSINT Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!--<link rel="stylesheet" href="style.css">-->
 </head>
 
 <body>
-    <!-- Haut du site-->
     <div class="layout">
         <header>
             <div class="topbar-logo">OSINT Dashboard</div>
@@ -23,44 +21,13 @@
             <button id="btn-toggle-sidebar">☰</button>
         </header>
 
-
-        <!-- Menu gauche, a modifier pour changer les données en brut-->
         <aside>
-            <h2>Cibles<span id="compteur-cibles">(2)</span></h2>
+            <h2>Cibles <span id="compteur-cibles"></span></h2>
             <input type="text" id="search" placeholder="Rechercher une cible...">
-            <ul><!--liste imbriquée-->
-                <li class="cible">
-                    Jean Dupont
-                    <button class="btn-supprimer">X</button>
-                    <ul>
-                        <li class="categorie">
-                            Infos
-                            <ul>
-                                <li>Réseaux Sociaux</li>
-                                <li>IP</li>
-                                <li>Sociétés</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li class="cible">
-                    Marc Dubois
-                    <button class="btn-supprimer">X</button>
-                    <ul>
-                        <li class="categorie">
-                            Infos
-                            <ul>
-                                <li>Réseaux Sociaux</li>
-                                <li>IP</li>
-                                <li>Sociétés</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <button id="btn-nouvelle-cible">Nouvelle cible</button>
+            <ul id="liste-cibles"></ul>
+            <button id="btn-nouvelle-cible">Nouvelle cible</button>
         </aside>
 
-        <!--Centre du site-->
         <main>
             <h2>Monitoring</h2>
             <div id="breadcrumb">
@@ -70,22 +37,22 @@
                 <span class="bc-sep"> / </span>
                 <span id="bc-cat">—</span>
             </div>
-            <section class="monitoring"><!--Santé du serveur-->
+            <section class="monitoring">
                 <div class="metric-card" title="Utilisation du processeur">
                     <span>CPU</span>
-                    <span id="cpu-val">0%</span><!--Mesure du CPU -->
+                    <span id="cpu-val">0%</span>
                 </div>
                 <div class="metric-card" title="Utilisation de la RAM">
                     <span>RAM</span>
-                    <span id="ram-val">0%</span><!--Mesure RAM-->
+                    <span id="ram-val">0%</span>
                 </div>
                 <div class="metric-card" title="Latence du serveur">
                     <span>Latence</span>
-                    <span id="latence-val">0ms</span><!--Mesure ping-->
+                    <span id="latence-val">0ms</span>
                 </div>
                 <div class="metric-card" title="Uptime serveur">
                     <span>Uptime</span>
-                    <span id="uptime-val">0%</span><!--Mesure uptime-->
+                    <span id="uptime-val">0%</span>
                 </div>
             </section>
             <div class="ecg-card">
@@ -93,58 +60,41 @@
                 <canvas id="ecg"></canvas>
             </div>
 
-
-            <section class="donnees"><!--Données récoltées par OSINT-->
+            <section class="donnees">
                 <h2>Données</h2>
-                <table>
-                    <tr>
-                        <td class="data-key">Nom-Prénom</td>
-                        <td>Jean Dupont<button class="btn-copier">⎘</button></td>
-                    </tr>
-                    <tr>
-                        <td class="data-key">téléphone</td>
-                        <td>06060606<button class="btn-copier">⎘</button></td>
-                    </tr>
-                    <tr>
-                        <td class="data-key">email</td>
-                        <td>jdupont@example.com<button class="btn-copier">⎘</button></td>
-                    </tr>
-                    <tr id="no-data" style="display:none">
-                        <td colspan="2">Aucune donnée disponible</td>
+                <table id="table-donnees">
+                    <tr id="no-data">
+                        <td colspan="2">Sélectionnez une cible pour afficher ses données</td>
                     </tr>
                 </table>
             </section>
         </main>
     </div>
-    <script src="{{ url_for('static', filename='main.js')}}"></script>
-    <!--<script src="main.js"></script>-->
-    <!--SCRIPT CLOCK A INTEGRER ICI-->
-    <script src="{{ url_for('static', filename='clock.js') }}"></script>
-    <!--<script src="clock.js"></script>-->
-    <!--Popup formulaire nouvelle cible-->
+
     <div id="modal" class="modal-overlay">
         <div class="modal-box">
             <h2>Nouvelle cible</h2>
-            <button id="modal-close">X</button>
+            <button id="modal-close">✕</button>
             <form id="form-cible">
                 <label>Nom</label>
-                <input type="text" id="input-nom" placeholder="Dupont">
+                <input type="text" id="input-nom" placeholder="Dupont" required>
 
                 <label>Prénom</label>
-                <input type="text" id="input-prenom" placeholder="Jean">
+                <input type="text" id="input-prenom" placeholder="Jean" required>
 
                 <label>Email</label>
-                <input type="text" id="input-email" placeholder="jean@example.com">
+                <input type="email" id="input-email" placeholder="jean@example.com">
 
                 <label>Téléphone</label>
                 <input type="text" id="input-tel" placeholder="06 00 00 00 00">
 
-                <label>Screenshot</label>
-                <input type="file" id="input-screen" accept="image/*">
                 <button type="submit">Ajouter</button>
             </form>
         </div>
     </div>
+
+    <script src="{{ url_for('static', filename='clock.js') }}"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 
 </html>

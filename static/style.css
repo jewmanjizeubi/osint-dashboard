@@ -203,6 +203,11 @@ aside.hidden {
     color: var(--bleu);
     margin-bottom: 6px;
     transition: color 0.2s;
+    list-style: none;
+}
+
+.cible-nom {
+    cursor: default;
 }
 
 .categorie {
@@ -211,6 +216,11 @@ aside.hidden {
     padding-left: 10px;
     font-size: 11px;
     transition: color 0.2s;
+    cursor: pointer;
+}
+
+.categorie:hover {
+    color: var(--bleu);
 }
 
 .donnees table {
@@ -399,8 +409,8 @@ tr:hover .btn-copier {
 
 /*============LOGIN============*/
 .layout-login {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 44px 1fr;
     height: 100vh;
 }
 
@@ -414,6 +424,17 @@ tr:hover .btn-copier {
     border: 1px solid #1a2d42;
     padding: 30px;
     box-sizing: border-box;
+}
+
+#login-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#login-box label {
+    font-size: 11px;
+    color: var(--bleu);
 }
 
 #login-box input {
