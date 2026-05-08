@@ -1,13 +1,13 @@
 //Fonction monitoring
 function updateMetrics() {
-    const cpu = Math.round(Math.random() * 100);
-    document.getElementById("cpu-val").innerHTML = cpu + "%";
-    const ram = Math.round(Math.random() * 100);
-    document.getElementById("ram-val").innerHTML = ram + "%";
-    const latence = Math.round(Math.random() * 100);
-    document.getElementById("latence-val").innerHTML = latence + "ms";
-    const uptime = Math.round(Math.random() * 100);
-    document.getElementById("uptime-val").innerHTML = "99.9%";
+    fetch("/api/metrics")
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+            document.getElementById("cpu-val").innerHTML = data.cpu + "%";
+            document.getElementById("ram-val").innerHTML = data.ram + "%";
+            document.getElementById("latence-val").innerHTML = data.latence + "ms";
+            document.getElementById("uptime-val").innerHTML = data.uptime + "%";
+        });
 }
 
 setInterval(updateMetrics, 2000);
@@ -90,17 +90,17 @@ window.onload = function () {
         layout.classList.toggle("sidebar-hidden");
     });
 
-    document.querySelectorAll(".btn-copier").forEach(function(btn) {
-  btn.addEventListener("click", function() {
-    const texte = this.parentElement.textContent.trim();
-    navigator.clipboard.writeText(texte).then(function() {
-      btn.innerHTML = "✓";
-      setTimeout(function() {
-        btn.innerHTML = "⎘";
-      }, 1500);
+    document.querySelectorAll(".btn-copier").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const texte = this.parentElement.textContent.trim();
+            navigator.clipboard.writeText(texte).then(function () {
+                btn.innerHTML = "✓";
+                setTimeout(function () {
+                    btn.innerHTML = "⎘";
+                }, 1500);
+            });
+        });
     });
-  });
-});
 }
 
 //Recherche menu gauche
