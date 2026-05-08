@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>OSINT Dashboard - Login</title>
-    <!--<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">-->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!--<link rel="stylesheet" href="style.css">-->
 </head>
 
 <body>
@@ -34,7 +34,8 @@
         </div>
     </main>
     <!--SCRIPT CLOCK A INTEGRER ICI-->
-    <script src="clock.js"></script>
+    <script src="{{ url_for('static', filename='clock.js') }}"></script>
+    <!--<script src="clock.js"></script>-->
 </body>
 
 </html>

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>OSINT Dashboard</title>
-    <!--<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">-->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!--<link rel="stylesheet" href="style.css">-->
 </head>
 
 <body>
@@ -119,7 +119,8 @@
     <!--<script src="{{ url_for('static', filename='main.js')}}"></script>-->
     <script src="main.js"></script>
     <!--SCRIPT CLOCK A INTEGRER ICI-->
-    <script src="clock.js"></script>
+    <script src="{{ url_for('static', filename='clock.js') }}"></script>
+    <!--<script src="clock.js"></script>-->
     <!--Popup formulaire nouvelle cible-->
     <div id="modal" class="modal-overlay">
         <div class="modal-box">
