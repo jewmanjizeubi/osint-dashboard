@@ -67,13 +67,6 @@ window.onload = function () {
             modal.classList.remove("active");
         }
     });
-
-    document.querySelectorAll(".btn-supprimer").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            const cible = btn.closest(".cible");
-            cible.remove;
-        });
-    });
     document.querySelectorAll(".btn-supprimer").forEach(function (btn) {
         btn.addEventListener("click", function () {
             console.log("clic détecté");
@@ -81,6 +74,33 @@ window.onload = function () {
             cible.remove();
         });
     });
+    document.querySelectorAll(".categorie").forEach(function (cat) {
+        cat.addEventListener("click", function () {
+            const cible = this.closest(".cible").childNodes[0].textContent.trim();
+            const categorie = this.childNodes[0].textContent.trim();
+            document.getElementById("bc-cible").innerHTML = cible;
+            document.getElementById("bc-cat").innerHTML = categorie;
+        });
+    });
+
+    document.getElementById("btn-toggle-sidebar").addEventListener("click", function () {
+        const sidebar = document.querySelector("aside");
+        const layout = document.querySelector(".layout");
+        sidebar.classList.toggle("hidden");
+        layout.classList.toggle("sidebar-hidden");
+    });
+
+    document.querySelectorAll(".btn-copier").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    const texte = this.parentElement.textContent.trim();
+    navigator.clipboard.writeText(texte).then(function() {
+      btn.innerHTML = "✓";
+      setTimeout(function() {
+        btn.innerHTML = "⎘";
+      }, 1500);
+    });
+  });
+});
 }
 
 //Recherche menu gauche

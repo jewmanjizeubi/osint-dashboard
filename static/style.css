@@ -72,6 +72,20 @@ header {
     margin-left: auto;
 }
 
+#btn-toggle-sidebar {
+    background: transparent;
+    border: none;
+    color: var(--bleu);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 10px;
+    transition: color 0.2s;
+}
+
+#btn-toggle-sidebar:hover {
+    color: var(--texte);
+}
+
 /*============MENU GAUCHE============*/
 aside {
     grid-area: sidebar;
@@ -171,8 +185,16 @@ aside::-webkit-scrollbar-thumb:hover {
 }
 
 #compteur-cibles {
-  font-size: 11px;
-  color: var(--text-dim);
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+aside.hidden {
+    display: none;
+}
+
+.layout.sidebar-hidden {
+    grid-template-columns: 1fr;
 }
 
 /*============DONNEES CIBLES============*/
@@ -225,6 +247,23 @@ h2 {
     text-align: center;
 }
 
+#breadcrumb {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1a2d42;
+}
+
+.bc-sep {
+    color: var(--text-faint);
+}
+
+#bc-cible,
+#bc-cat {
+    color: var(--bleu);
+}
+
 /*============SUIVI STATUT SERVEUR============*/
 .monitoring {
     display: flex;
@@ -265,6 +304,21 @@ canvas {
     height: 80px;
     ;
     display: block;
+}
+
+.btn-copier {
+  background: transparent;
+  border: none;
+  color: var(--bleu);
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding: 0 4px;
+}
+
+tr:hover .btn-copier {
+  opacity: 1;
 }
 
 /*============POP UP FORMULAIRE============*/
