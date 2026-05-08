@@ -49,3 +49,28 @@ def logout():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+    
+@app.route("/api/cibles", methods=["POST"])
+def ajouter_cible():
+    if "user" not in session:
+        return jsonify({"error": "non autorisé"}), 401
+    
+    data = request.json
+    con = sqlite3.connect("database.db")
+    con.execute(
+        "INSERT INTO cibles (nom, prenom, email, telephone) VALUES (?, ?, ?, ?)",
+        (data["nom"], data["prenom"], data["email"], data["telephone"])
+    )
+    con.commit()
+    con.close()
+    return jsonify({"status": "ok"})
+
+@app.route("/api/cibles", methods=["GET"])
+def get_cibles():
+    if "user" not in session:
+        return jsonify({"error": "non autorisé"}), 401
+    
+    con = sqlite3.connect("database.db")
+    rows = con.execute("SELECT * FROM cibles").fetchall()
+    con.close()
+    return jsonify([{"id": r[0], "nom": r[1], "prenom": r[2], "email": r[3], "telephone": r[4]} for r in rows])
