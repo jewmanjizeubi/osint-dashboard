@@ -17,9 +17,12 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = hashlib.sha256(request.form["password"].encode()).hexdigest()
+        print("username reçu:", username)
+        print("password hash reçu:", password)
         
         con = sqlite3.connect("database.db")
         user = con.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password)).fetchone()
+        print("user trouvé:", user)
         con.close()
         
         if user:
