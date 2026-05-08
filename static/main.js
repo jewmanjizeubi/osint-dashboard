@@ -46,6 +46,56 @@ function drawECG() {
     requestAnimationFrame(drawECG);
 }
 
+// Soumission formulaire nouvelle cible
+document.getElementById("form-cible").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const data = {
+        nom: document.getElementById("input-nom").value,
+        prenom: document.getElementById("input-prenom").value,
+        email: document.getElementById("input-email").value,
+        telephone: document.getElementById("input-tel").value
+    };
+
+    fetch("/api/cibles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+            if (data.status === "ok") {
+                modal.classList.remove("active");
+                chargerCibles();
+            }
+        });
+});
+
+function chargerCibles() {
+    fetch("/api/cibles")
+        .then(function (r) { return r.json(); })
+        .then(function (cibles) {
+            const ul = document.querySelector(".tree ul");
+            ul.innerHTML = "";
+            cibles.forEach(function (cible) {
+                ul.innerHTML += `
+          <li class="cible">
+            ${cible.nom} ${cible.prenom}
+            <button class="btn-supprimer">✕</button>
+            <ul>
+              <li class="categorie">Infos
+                <ul>
+                  <li>${cible.email}</li>
+                  <li>${cible.telephone}</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        `;
+            });
+        });
+}
+
 window.onload = function () {
     canvas.width = canvas.parentElement.offsetWidth - 20;
     canvas.height = 100;
@@ -101,6 +151,7 @@ window.onload = function () {
             });
         });
     });
+    chargerCibles();
 }
 
 //Recherche menu gauche
@@ -120,27 +171,3 @@ searchInput.addEventListener("input", function () {
     });
 });
 
-// Soumission formulaire nouvelle cible
-document.getElementById("form-cible").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const data = {
-        nom: document.getElementById("input-nom").value,
-        prenom: document.getElementById("input-prenom").value,
-        email: document.getElementById("input-email").value,
-        telephone: document.getElementById("input-tel").value
-    };
-
-    fetch("/api/cibles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    })
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-            if (data.status === "ok") {
-                modal.classList.remove("active");
-                alert("Cible ajoutée !");
-            }
-        });
-});
