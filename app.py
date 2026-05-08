@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, jsonify
+import psutil
 
 app = Flask(__name__)
-app.secret_key = "changeme"  # à changer par une vraie clé secrète sur la VM
+app.secret_key = "changeme"
 
 @app.route("/")
 def index():
@@ -13,16 +14,14 @@ def index():
 def login():
     return render_template("login.html")
 
-import psutil
-
 @app.route("/api/metrics")
 def metrics():
-    return {
+    return jsonify({
         "cpu": psutil.cpu_percent(interval=1),
         "ram": psutil.virtual_memory().percent,
         "latence": 0,
         "uptime": 99.9
-    }
+    })
 
 @app.route("/logout")
 def logout():
