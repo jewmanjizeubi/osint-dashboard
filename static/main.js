@@ -120,3 +120,27 @@ searchInput.addEventListener("input", function () {
     });
 });
 
+// Soumission formulaire nouvelle cible
+document.getElementById("form-cible").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const data = {
+        nom: document.getElementById("input-nom").value,
+        prenom: document.getElementById("input-prenom").value,
+        email: document.getElementById("input-email").value,
+        telephone: document.getElementById("input-tel").value
+    };
+
+    fetch("/api/cibles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+            if (data.status === "ok") {
+                modal.classList.remove("active");
+                alert("Cible ajoutée !");
+            }
+        });
+});
