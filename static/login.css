@@ -1,0 +1,251 @@
+/* ============ VARIABLES ============ */
+:root {
+    --bg:    #020810;
+    --blue:  #00d4ff;
+    --blue2: #0088aa;
+    --gold:  #ffa500;
+    --dim:   #0a2535;
+    --text:  #a8d8ea;
+    --faint: #1a3a50;
+}
+
+/* ============ BASE ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============ BACKGROUND CANVAS ============ */
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+/* ============ SCAN LINE ============ */
+.scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: rgba(0, 212, 255, 0.06);
+    animation: scanline 8s linear infinite;
+    z-index: 3;
+    pointer-events: none;
+}
+
+@keyframes scanline {
+    0%   { top: 44px; }
+    100% { top: 100vh; }
+}
+
+/* ============ HEADER ============ */
+header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--faint);
+    z-index: 10;
+    background: rgba(2, 8, 16, 0.8);
+}
+
+.topbar-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 4px;
+}
+
+.topbar-clock {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.topbar-status {
+    margin-left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--blue);
+    letter-spacing: 2px;
+}
+
+.pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #1d9e75;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.3; transform: scale(0.7); }
+}
+
+/* ============ CORNER BRACKETS ============ */
+.corner {
+    position: fixed;
+    width: 40px; height: 40px;
+    border-color: var(--blue);
+    border-style: solid;
+    opacity: 0.3;
+    z-index: 5;
+}
+.corner-tl { top: 54px;  left: 16px;  border-width: 2px 0 0 2px; }
+.corner-tr { top: 54px;  right: 16px; border-width: 2px 2px 0 0; }
+.corner-bl { bottom: 16px; left: 16px;  border-width: 0 0 2px 2px; }
+.corner-br { bottom: 16px; right: 16px; border-width: 0 2px 2px 0; }
+
+/* ============ ORB WRAP ============ */
+.orb-wrap {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+#orb-canvas {
+    display: block;
+}
+
+/* ============ LOGIN PANEL ============ */
+.login-panel {
+    width: 320px;
+    border: 1px solid var(--faint);
+    background: rgba(5, 15, 28, 0.85);
+    padding: 28px;
+    position: relative;
+}
+
+.login-panel::before,
+.login-panel::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    border-color: var(--blue);
+    border-style: solid;
+}
+
+.login-panel::before {
+    top: -1px; left: -1px;
+    border-width: 2px 0 0 2px;
+}
+
+.login-panel::after {
+    bottom: -1px; right: -1px;
+    border-width: 0 2px 2px 0;
+}
+
+.login-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 4px;
+    text-align: center;
+    margin-bottom: 24px;
+    opacity: 0.8;
+}
+
+/* ============ FORM FIELDS ============ */
+.field {
+    margin-bottom: 16px;
+}
+
+.field label {
+    display: block;
+    font-size: 10px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    opacity: 0.7;
+}
+
+.field input {
+    width: 100%;
+    background: rgba(0, 212, 255, 0.04);
+    border: 1px solid var(--faint);
+    border-bottom-color: var(--blue2);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.field input:focus {
+    border-color: var(--blue);
+    background: rgba(0, 212, 255, 0.07);
+}
+
+/* ============ ERROR ============ */
+.login-error {
+    display: none;
+    font-size: 10px;
+    color: #ff4444;
+    border: 1px solid #ff444430;
+    background: #1a050530;
+    padding: 6px 10px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+}
+
+.login-error.visible { display: block; }
+
+/* ============ BUTTON ============ */
+.btn-login {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    padding: 10px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-login:hover {
+    background: var(--blue);
+    color: var(--bg);
+}
+
+.btn-login:active {
+    transform: scale(0.98);
+}
+
+.btn-login::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.15), transparent);
+    animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+    0%   { left: -60%; }
+    100% { left: 160%; }
+}

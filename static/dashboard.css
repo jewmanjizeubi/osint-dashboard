@@ -1,0 +1,768 @@
+/* ============ VARIABLES ============ */
+:root {
+    --bg:     #020810;
+    --bg2:    #050f1c;
+    --bg3:    #071520;
+    --blue:   #00d4ff;
+    --blue2:  #0088aa;
+    --gold:   #ffa500;
+    --red:    #ff3333;
+    --green:  #1d9e75;
+    --text:   #a8d8ea;
+    --faint:  #1a3a50;
+    --dim:    #0a2535;
+}
+
+/* ============ BASE ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: rgba(0, 212, 255, 0.05);
+    animation: scanline 10s linear infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes scanline {
+    0%   { top: 44px; }
+    100% { top: 100vh; }
+}
+
+/* ============ HEADER ============ */
+header {
+    position: relative;
+    z-index: 20;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--faint);
+    background: rgba(2, 8, 16, 0.95);
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--blue);
+    letter-spacing: 4px;
+}
+
+.header-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--faint);
+}
+
+.topbar-sub {
+    font-size: 10px;
+    color: var(--text);
+    letter-spacing: 3px;
+    opacity: 0.5;
+}
+
+.header-center {
+    margin: 0 auto;
+    font-size: 11px;
+    color: var(--text);
+    opacity: 0.5;
+    letter-spacing: 2px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 2px;
+}
+
+.pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.3; transform: scale(0.7); }
+}
+
+.btn-logout {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: 2px;
+    opacity: 0.4;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.btn-logout:hover {
+    opacity: 1;
+    color: var(--red);
+}
+
+/* ============ LAYOUT ============ */
+.layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+/* ============ SIDEBAR ============ */
+aside {
+    border-right: 1px solid var(--faint);
+    background: rgba(5, 15, 28, 0.9);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 16px 12px;
+    gap: 12px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 3px;
+}
+
+.cible-count {
+    font-size: 10px;
+    color: var(--blue);
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid var(--faint);
+    padding: 2px 8px;
+}
+
+.search-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--faint);
+    background: rgba(0,0,0,0.3);
+    padding: 6px 10px;
+    gap: 8px;
+}
+
+.search-icon {
+    color: var(--blue2);
+    font-size: 16px;
+    opacity: 0.6;
+}
+
+#search {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    width: 100%;
+}
+
+#search::placeholder { color: var(--faint); }
+
+.cible-list {
+    list-style: none;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cible-list::-webkit-scrollbar { width: 3px; }
+.cible-list::-webkit-scrollbar-track { background: transparent; }
+.cible-list::-webkit-scrollbar-thumb { background: var(--faint); }
+
+.cible-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.cible-item:hover {
+    border-color: var(--faint);
+    background: rgba(0, 212, 255, 0.04);
+}
+
+.cible-item.active {
+    border-color: var(--blue);
+    background: rgba(0, 212, 255, 0.08);
+}
+
+.cible-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--blue);
+}
+
+.cible-nom {
+    font-size: 12px;
+    color: var(--blue);
+    font-weight: bold;
+}
+
+.cible-prenom {
+    font-size: 10px;
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.btn-supprimer-item {
+    background: transparent;
+    border: none;
+    color: var(--red);
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    padding: 2px 4px;
+}
+
+.cible-item:hover .btn-supprimer-item { opacity: 1; }
+
+.btn-new {
+    background: transparent;
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-new:hover {
+    background: var(--blue);
+    color: var(--bg);
+}
+
+/* ============ MAIN ============ */
+main {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 20px;
+    gap: 20px;
+}
+
+main::-webkit-scrollbar { width: 4px; }
+main::-webkit-scrollbar-track { background: transparent; }
+main::-webkit-scrollbar-thumb { background: var(--faint); }
+
+/* ============ SECTION LABEL ============ */
+.section-label {
+    font-size: 10px;
+    color: var(--blue);
+    letter-spacing: 3px;
+    opacity: 0.6;
+    margin-bottom: 12px;
+}
+
+/* ============ MONITORING ============ */
+.monitoring-section {
+    flex-shrink: 0;
+}
+
+.metrics-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.metric-card {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--faint);
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px; height: 100%;
+    background: var(--blue);
+    opacity: 0.5;
+}
+
+.metric-label {
+    font-size: 9px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    opacity: 0.7;
+    margin-bottom: 6px;
+}
+
+.metric-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 8px;
+}
+
+.metric-bar {
+    height: 2px;
+    background: var(--dim);
+    width: 100%;
+}
+
+.metric-fill {
+    height: 100%;
+    background: var(--blue);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.metric-fill.warn { background: var(--gold); }
+.metric-fill.danger { background: var(--red); }
+
+.ecg-wrap {
+    background: var(--bg3);
+    border: 1px solid var(--faint);
+    padding: 10px 14px;
+}
+
+.ecg-label {
+    font-size: 9px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    opacity: 0.6;
+    margin-bottom: 6px;
+}
+
+#ecg {
+    width: 100%;
+    height: 60px;
+    display: block;
+}
+
+/* ============ DOSSIER ============ */
+.dossier-section {
+    flex: 1;
+    min-height: 300px;
+}
+
+.dossier-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 280px;
+    gap: 16px;
+    opacity: 0.4;
+}
+
+.empty-orb {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 1px solid var(--blue);
+    position: relative;
+    animation: rotate 8s linear infinite;
+}
+
+.empty-orb::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px dashed var(--blue2);
+    animation: rotate 4s linear infinite reverse;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.empty-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--blue);
+}
+
+.empty-sub {
+    font-size: 10px;
+    color: var(--text);
+    opacity: 0.5;
+    text-align: center;
+}
+
+/* ---- Dossier content ---- */
+.dossier-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dossier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--faint);
+    padding-bottom: 12px;
+}
+
+.dossier-title-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.dossier-id {
+    font-size: 10px;
+    color: var(--blue2);
+    letter-spacing: 2px;
+    opacity: 0.6;
+}
+
+.dossier-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 2px;
+}
+
+.dossier-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    background: transparent;
+    border: 1px solid var(--faint);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action:hover { border-color: var(--blue); color: var(--blue); }
+.btn-delete-cible:hover { border-color: var(--red) !important; color: var(--red) !important; }
+
+/* ============ TABS ============ */
+.tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--faint);
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+}
+
+.tab:hover { opacity: 0.8; }
+
+.tab.active {
+    opacity: 1;
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+}
+
+.tab-panel { display: none; padding-top: 16px; }
+.tab-panel.active { display: block; }
+
+/* ============ DATA TABLE ============ */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+.data-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--dim);
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.data-table tr:hover td { background: rgba(0, 212, 255, 0.03); }
+
+.data-key {
+    color: var(--blue);
+    font-size: 10px;
+    letter-spacing: 2px;
+    width: 140px;
+    opacity: 0.7;
+}
+
+.btn-copier {
+    background: transparent;
+    border: none;
+    color: var(--blue);
+    cursor: pointer;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+tr:hover .btn-copier { opacity: 1; }
+
+.btn-add-info {
+    background: transparent;
+    border: 1px dashed var(--faint);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+.btn-add-info:hover {
+    opacity: 1;
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+/* ============ RÉSEAUX ============ */
+.reseaux-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.reseau-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--faint);
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--text);
+}
+
+.reseau-tag span { color: var(--blue); font-size: 10px; }
+
+/* ============ FICHIERS ============ */
+.fichiers-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.fichier-card {
+    background: var(--bg3);
+    border: 1px solid var(--faint);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.fichier-card:hover { border-color: var(--blue); }
+
+.fichier-icon { font-size: 20px; opacity: 0.6; }
+.fichier-nom { font-size: 11px; color: var(--text); word-break: break-all; }
+.fichier-type { font-size: 9px; color: var(--blue); letter-spacing: 2px; opacity: 0.6; }
+
+/* ============ NOTES ============ */
+#notes-area {
+    width: 100%;
+    height: 180px;
+    background: var(--bg3);
+    border: 1px solid var(--faint);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 12px;
+    outline: none;
+    resize: vertical;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+}
+
+#notes-area:focus { border-color: var(--blue); }
+
+/* ============ MODAL ============ */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+    background: var(--bg2);
+    border: 1px solid var(--faint);
+    padding: 28px;
+    width: 380px;
+    position: relative;
+}
+
+.modal-box::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 20px; height: 20px;
+    border-top: 2px solid var(--blue);
+    border-left: 2px solid var(--blue);
+}
+
+.modal-box::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 20px; height: 20px;
+    border-bottom: 2px solid var(--blue);
+    border-right: 2px solid var(--blue);
+}
+
+.modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 4px;
+    margin-bottom: 24px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.modal-close:hover { opacity: 1; color: var(--red); }
+
+.field { margin-bottom: 16px; }
+
+.field label {
+    display: block;
+    font-size: 10px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    opacity: 0.7;
+}
+
+.field input {
+    width: 100%;
+    background: rgba(0, 212, 255, 0.04);
+    border: 1px solid var(--faint);
+    border-bottom-color: var(--blue2);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.field input:focus { border-color: var(--blue); }
+
+.btn-login {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-login:hover {
+    background: var(--blue);
+    color: var(--bg);
+}
+
+.btn-upload { display: inline-block; }
