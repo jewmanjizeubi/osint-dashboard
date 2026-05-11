@@ -1,43 +1,56 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
-    <title>OSINT Dashboard - Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!--<link rel="stylesheet" href="style.css">-->
+    <title>FRIDAY — Authentification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <!--<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">-->
+    <link rel="stylesheet" href="login.css">
 </head>
-
 <body>
-    <div class="layout_login">
-        <header>
-            <div class="topbar-logo">OSINT Dashboard - Login</div>
-            <div class="topbar-clock">
-                <span id="clock"></span>
-            </div>
-            <div class="topbar-status">
-                <span>SERVEUR EN LIGNE</span>
-                <span class="pulse-dot"></span>
-            </div>
-        </header>
+
+<canvas id="bg-canvas"></canvas>
+<div class="scanline"></div>
+
+<header>
+    <div class="topbar-logo">F·R·I·D·A·Y</div>
+    <div class="topbar-clock"><span id="clock"></span></div>
+    <div class="topbar-status">
+        <span class="pulse-dot"></span>
+        <span>SERVEUR EN LIGNE</span>
     </div>
-    <main>
-        <div id="login-box">
-            <h2>Login</h2>
-            <form method="POST">
-                <label>Username</label>
-                <input type="text" id="input-username" name="username" placeholder="">
+</header>
 
-                <label>Password</label>
-                <input type="password" id="input-password" name="password" placeholder="">
-                <div id="login-error" class="login error">Identifiants incorrects</div>
-                <button type="submit">Connexion</button>
-            </form>
-        </div>
-    </main>
-    <!--SCRIPT CLOCK A INTEGRER ICI-->
-    <script src="{{ url_for('static', filename='clock.js') }}"></script>
-    <!--<script src="clock.js"></script>-->
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div class="orb-wrap">
+    <canvas id="orb-canvas" width="220" height="220"></canvas>
+
+    <div class="login-panel">
+        <div class="login-title">AUTHENTIFICATION</div>
+
+        {% if error %}
+        <div class="login-error visible">IDENTIFIANTS INCORRECTS</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="field">
+                <label>IDENTIFIANT</label>
+                <input type="text" name="username" autocomplete="off" autofocus>
+            </div>
+            <div class="field">
+                <label>MOT DE PASSE</label>
+                <input type="password" name="password">
+            </div>
+            <button type="submit" class="btn-login">ACCÈS SYSTÈME</button>
+        </form>
+    </div>
+</div>
+
+<!--<script src="{{ url_for('static', filename='login.js') }}"></script>-->
+<script src="login.js"></script>
 </body>
-
 </html>
