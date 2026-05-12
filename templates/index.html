@@ -1,197 +1,256 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>FRIDAY — OSINT Dashboard</title>
     <!--<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">-->
     <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf/umd.min.js"></script>
 </head>
+
 <body>
 
-<canvas id="bg-canvas"></canvas>
-<div class="scanline"></div>
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanline"></div>
 
-<!-- HEADER -->
-<header>
-    <div class="header-left">
-        <div class="topbar-logo">F·R·I·D·A·Y</div>
-        <div class="header-sep"></div>
-        <div class="topbar-sub">OSINT DASHBOARD</div>
-    </div>
-    <div class="header-center">
-        <span id="clock"></span>
-    </div>
-    <div class="header-right">
-        <div class="topbar-status">
-            <span class="pulse-dot"></span>
-            <span>SERVEUR EN LIGNE</span>
+    <!-- HEADER -->
+    <header>
+        <div class="header-left">
+            <div class="topbar-logo">F·R·I·D·A·Y</div>
+            <div class="header-sep"></div>
+            <div class="topbar-sub">OSINT DASHBOARD</div>
         </div>
-        <a href="/logout" class="btn-logout">DÉCONNEXION</a>
-    </div>
-</header>
-
-<!-- LAYOUT -->
-<div class="layout">
-
-    <!-- SIDEBAR -->
-    <aside id="sidebar">
-        <div class="sidebar-header">
-            <span class="sidebar-title">CIBLES</span>
-            <span id="compteur-cibles" class="cible-count">0</span>
+        <div class="header-center">
+            <span id="clock"></span>
         </div>
-
-        <div class="search-wrap">
-            <span class="search-icon">⌕</span>
-            <input type="text" id="search" placeholder="Rechercher...">
-        </div>
-
-        <ul id="cible-list" class="cible-list"></ul>
-
-        <button id="btn-nouvelle-cible" class="btn-new">
-            <span>+</span> NOUVELLE CIBLE
-        </button>
-    </aside>
-
-    <!-- MAIN -->
-    <main id="main">
-
-        <!-- MONITORING -->
-        <section class="monitoring-section">
-            <div class="section-label">// MONITORING SYSTÈME</div>
-            <div class="metrics-row">
-                <div class="metric-card" id="card-cpu">
-                    <div class="metric-label">CPU</div>
-                    <div class="metric-value" id="cpu-val">0%</div>
-                    <div class="metric-bar"><div class="metric-fill" id="cpu-bar"></div></div>
-                </div>
-                <div class="metric-card" id="card-ram">
-                    <div class="metric-label">RAM</div>
-                    <div class="metric-value" id="ram-val">0%</div>
-                    <div class="metric-bar"><div class="metric-fill" id="ram-bar"></div></div>
-                </div>
-                <div class="metric-card" id="card-temp">
-                    <div class="metric-label">TEMP</div>
-                    <div class="metric-value" id="temp-val">0°C</div>
-                    <div class="metric-bar"><div class="metric-fill" id="temp-bar"></div></div>
-                </div>
-                <div class="metric-card" id="card-disk">
-                    <div class="metric-label">DISK</div>
-                    <div class="metric-value" id="disk-val">0%</div>
-                    <div class="metric-bar"><div class="metric-fill" id="disk-bar"></div></div>
-                </div>
-                <div class="metric-card" id="card-uptime">
-                    <div class="metric-label">UPTIME</div>
-                    <div class="metric-value" id="uptime-val">—</div>
-                </div>
+        <div class="header-right">
+            <div class="topbar-status">
+                <span class="pulse-dot"></span>
+                <span>SERVEUR EN LIGNE</span>
             </div>
-            <div class="ecg-wrap">
-                <div class="ecg-label">CPU LOAD</div>
-                <canvas id="ecg"></canvas>
-            </div>
-        </section>
+            <a href="/logout" class="btn-logout">DÉCONNEXION</a>
+        </div>
+    </header>
 
-        <!-- DOSSIER CIBLE -->
-        <section class="dossier-section" id="dossier-section">
-            <div class="dossier-empty" id="dossier-empty">
-                <div class="empty-orb"></div>
-                <div class="empty-text">SÉLECTIONNER UNE CIBLE</div>
-                <div class="empty-sub">Choisissez une cible dans le panneau gauche pour afficher son dossier</div>
+    <!-- LAYOUT -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">CIBLES</span>
+                <span id="compteur-cibles" class="cible-count">0</span>
             </div>
 
-            <div class="dossier-content" id="dossier-content" style="display:none">
-                <div class="dossier-header">
-                    <div class="dossier-title-wrap">
-                        <span class="dossier-id">CIBLE #<span id="d-id">—</span></span>
-                        <span class="dossier-name" id="d-name">—</span>
+            <div class="search-wrap">
+                <span class="search-icon">⌕</span>
+                <input type="text" id="search" placeholder="Rechercher...">
+            </div>
+
+            <ul id="cible-list" class="cible-list"></ul>
+
+            <button id="btn-nouvelle-cible" class="btn-new">
+                <span>+</span> NOUVELLE CIBLE
+            </button>
+        </aside>
+
+        <!-- MAIN -->
+        <main id="main">
+
+            <!-- MONITORING -->
+            <section class="monitoring-section">
+                <div class="section-label">// MONITORING SYSTÈME</div>
+                <div class="metrics-row">
+                    <div class="metric-card" id="card-cpu">
+                        <div class="metric-label">CPU</div>
+                        <div class="metric-value" id="cpu-val">0%</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="cpu-bar"></div>
+                        </div>
                     </div>
-                    <div class="dossier-actions">
-                        <button class="btn-action btn-edit-cible">✎ MODIFIER</button>
-                        <button class="btn-action btn-delete-cible" id="btn-delete-cible">✕ SUPPRIMER</button>
+                    <div class="metric-card" id="card-ram">
+                        <div class="metric-label">RAM</div>
+                        <div class="metric-value" id="ram-val">0%</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="ram-bar"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="card-temp">
+                        <div class="metric-label">TEMP</div>
+                        <div class="metric-value" id="temp-val">0°C</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="temp-bar"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="card-disk">
+                        <div class="metric-label">DISK</div>
+                        <div class="metric-value" id="disk-val">0%</div>
+                        <div class="metric-bar">
+                            <div class="metric-fill" id="disk-bar"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="card-uptime">
+                        <div class="metric-label">UPTIME</div>
+                        <div class="metric-value" id="uptime-val">—</div>
                     </div>
                 </div>
+                <div class="ecg-wrap">
+                    <div class="ecg-label">CPU LOAD</div>
+                    <canvas id="ecg"></canvas>
+                </div>
+            </section>
 
-                <!-- TABS -->
-                <div class="tabs">
-                    <button class="tab active" data-tab="infos">INFOS</button>
-                    <button class="tab" data-tab="reseaux">RÉSEAUX</button>
-                    <button class="tab" data-tab="fichiers">FICHIERS</button>
-                    <button class="tab" data-tab="notes">NOTES</button>
+            <!-- DOSSIER CIBLE -->
+            <section class="dossier-section" id="dossier-section">
+                <div class="dossier-empty" id="dossier-empty">
+                    <div class="empty-orb"></div>
+                    <div class="empty-text">SÉLECTIONNER UNE CIBLE</div>
+                    <div class="empty-sub">Choisissez une cible dans le panneau gauche pour afficher son dossier</div>
                 </div>
 
-                <!-- TAB: INFOS -->
-                <div class="tab-panel active" id="tab-infos">
-                    <table class="data-table" id="infos-table">
-                        <tr>
-                            <td class="data-key">NOM COMPLET</td>
-                            <td id="d-fullname">—</td>
-                            <td><button class="btn-copier">⎘</button></td>
-                        </tr>
-                        <tr>
-                            <td class="data-key">EMAIL</td>
-                            <td id="d-email">—</td>
-                            <td><button class="btn-copier">⎘</button></td>
-                        </tr>
-                        <tr>
-                            <td class="data-key">TÉLÉPHONE</td>
-                            <td id="d-tel">—</td>
-                            <td><button class="btn-copier">⎘</button></td>
-                        </tr>
-                    </table>
-                    <button class="btn-add-info">+ AJOUTER UN CHAMP</button>
-                </div>
+                <div class="dossier-content" id="dossier-content" style="display:none">
+                    <div class="dossier-header">
+                        <div class="dossier-title-wrap">
+                            <span class="dossier-id">CIBLE #<span id="d-id">—</span></span>
+                            <span class="dossier-name" id="d-name">—</span>
+                            <div class="risk-badge" id="risk-badge">
+                                <span class="risk-dot" id="risk-dot"></span>
+                                <span id="risk-label">-</span>
+                            </div>
+                        </div>
+                        <div class="dossier-actions">
+                            <button class="btn-action btn-edit-cible">✎ MODIFIER</button>
+                            <button class="btn-action btn-delete-cible" id="btn-delete-cible">✕ SUPPRIMER</button>
+                            <button class="btn-action btn-export-pdf" id="btn-export-pdf">↓ EXPORT PDF</button>
+                        </div>
+                    </div>
 
-                <!-- TAB: RÉSEAUX SOCIAUX -->
-                <div class="tab-panel" id="tab-reseaux">
-                    <div id="reseaux-list" class="reseaux-list"></div>
-                    <button class="btn-add-info">+ AJOUTER UN RÉSEAU</button>
-                </div>
+                    <!-- TABS -->
+                    <div class="tabs">
+                        <button class="tab active" data-tab="infos">INFOS</button>
+                        <button class="tab" data-tab="reseaux">RÉSEAUX</button>
+                        <button class="tab" data-tab="fichiers">FICHIERS</button>
+                        <button class="tab" data-tab="notes">NOTES</button>
+                        <button class="tab" data-tab="timeline">TIMELINE</button>
+                        <button class="tab" data-tab="historique">HISTORIQUE</button>
+                    </div>
 
-                <!-- TAB: FICHIERS -->
-                <div class="tab-panel" id="tab-fichiers">
-                    <div id="fichiers-list" class="fichiers-list"></div>
-                    <label class="btn-add-info btn-upload">
-                        ↑ UPLOAD FICHIER
-                        <input type="file" id="file-upload" style="display:none" multiple>
-                    </label>
-                </div>
+                    <!-- TAB: INFOS -->
+                    <div class="tab-panel active" id="tab-infos">
+                        <table class="data-table" id="infos-table">
+                            <tr>
+                                <td class="data-key">NOM COMPLET</td>
+                                <td id="d-fullname">—</td>
+                                <td><button class="btn-copier">⎘</button></td>
+                            </tr>
+                            <tr>
+                                <td class="data-key">EMAIL</td>
+                                <td id="d-email">—</td>
+                                <td><button class="btn-copier">⎘</button></td>
+                            </tr>
+                            <tr>
+                                <td class="data-key">TÉLÉPHONE</td>
+                                <td id="d-tel">—</td>
+                                <td><button class="btn-copier">⎘</button></td>
+                            </tr>
+                        </table>
+                        <button class="btn-add-info">+ AJOUTER UN CHAMP</button>
+                    </div>
 
-                <!-- TAB: NOTES -->
-                <div class="tab-panel" id="tab-notes">
-                    <textarea id="notes-area" placeholder="Notes libres sur cette cible..."></textarea>
-                    <button class="btn-add-info" id="btn-save-notes">SAUVEGARDER</button>
-                </div>
-            </div>
-        </section>
-    </main>
-</div>
+                    <!-- TAB: RÉSEAUX SOCIAUX -->
+                    <div class="tab-panel" id="tab-reseaux">
+                        <div id="reseaux-list" class="reseaux-list"></div>
+                        <button class="btn-add-info">+ AJOUTER UN RÉSEAU</button>
+                    </div>
 
-<!-- MODAL NOUVELLE CIBLE -->
-<div id="modal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-title">NOUVELLE CIBLE</div>
-        <button id="modal-close" class="modal-close">✕</button>
-        <form id="form-cible">
-            <div class="field">
-                <label>NOM</label>
-                <input type="text" id="input-nom" placeholder="Dupont">
-            </div>
-            <div class="field">
-                <label>PRÉNOM</label>
-                <input type="text" id="input-prenom" placeholder="Jean">
-            </div>
-            <div class="field">
-                <label>EMAIL</label>
-                <input type="text" id="input-email" placeholder="jean@example.com">
-            </div>
-            <div class="field">
-                <label>TÉLÉPHONE</label>
-                <input type="text" id="input-tel" placeholder="06 00 00 00 00">
-            </div>
-            <button type="submit" class="btn-login">CRÉER LE DOSSIER</button>
-        </form>
+                    <!-- TAB: FICHIERS -->
+                    <div class="tab-panel" id="tab-fichiers">
+                        <div id="fichiers-list" class="fichiers-list"></div>
+                        <label class="btn-add-info btn-upload">
+                            ↑ UPLOAD FICHIER
+                            <input type="file" id="file-upload" style="display:none" multiple>
+                        </label>
+                    </div>
+
+                    <!-- TAB: NOTES -->
+                    <div class="tab-panel" id="tab-notes">
+                        <textarea id="notes-area" placeholder="Notes libres sur cette cible..."></textarea>
+                        <button class="btn-add-info" id="btn-save-notes">SAUVEGARDER</button>
+                    </div>
+                    <!--TAB: TIMELINE-->
+                    <div class="tab-panel" id="tab-timeline">
+                        <div id="timeline-list" class="timeline-list"></div>
+                        <div class="timeline-add">
+                            <input type="text" id="timeline-input" placeholder="Nouvel élément...">
+                            <select id="timeline-type">
+                                <option value="info">INFO</option>
+                                <option value="alert">ALERTE</option>
+                                <option value="action">ACTION</option>
+                                <option value="contact">CONTACT</option>
+                            </select>
+                            <button class="btn-add-info" id="btn-add-event">+ AJOUTER</button>
+                        </div>
+                    </div>
+                    <!--TAB : HISTORIQUE-->
+                    <div class="tab-panel" id="tab-historique">
+                        <div id="historique-list" class="historique-list"></div>
+                        <button class="btn-add-info btn-danger" id="btn-clear-historique">EFFACER L'HISTORIQUE</button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
-</div>
 
-<script src="dashboard.js"></script>
+    <!-- MODAL NOUVELLE CIBLE -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">NOUVELLE CIBLE</div>
+            <button id="modal-close" class="modal-close">✕</button>
+            <form id="form-cible">
+                <div class="field">
+                    <label>NOM</label>
+                    <input type="text" id="input-nom" placeholder="Dupont">
+                </div>
+                <div class="field">
+                    <label>PRÉNOM</label>
+                    <input type="text" id="input-prenom" placeholder="Jean">
+                </div>
+                <div class="field">
+                    <label>EMAIL</label>
+                    <input type="text" id="input-email" placeholder="jean@example.com">
+                </div>
+                <div class="field">
+                    <label>TÉLÉPHONE</label>
+                    <input type="text" id="input-tel" placeholder="06 00 00 00 00">
+                </div>
+                <button type="submit" class="btn-login">CRÉER LE DOSSIER</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- WIDGET FRIDAY -->
+    <div id="friday-widget" class="friday-widget">
+        <div class="friday-widget-header">
+            <canvas id="widget-orb" width="40" height="40"></canvas>
+            <span class="friday-widget-title">F·R·I·D·A·Y</span>
+            <span id="friday-widget-status" class="friday-widget-status">● STANDBY</span>
+            <button id="friday-widget-toggle" class="friday-widget-close">−</button>
+        </div>
+        <div id="friday-widget-body" class="friday-widget-body">
+            <div id="friday-widget-log" class="friday-widget-log"></div>
+            <div class="friday-widget-input-wrap">
+                <span class="friday-widget-prompt">></span>
+                <input type="text" id="friday-widget-input" placeholder="Parler à Friday...">
+                <button id="friday-widget-send">↵</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton pour ouvrir le widget -->
+    <button id="friday-fab" class="friday-fab">⬡ FRIDAY</button>
+
+    <script src="dashboard.js"></script>
 </body>
+
 </html>
