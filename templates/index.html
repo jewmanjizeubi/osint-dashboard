@@ -6,7 +6,11 @@
     <title>FRIDAY — OSINT Dashboard</title>
     <!--<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">-->
     <link rel="stylesheet" href="dashboard.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf/umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 
 <body>
@@ -20,6 +24,15 @@
             <div class="topbar-logo">F·R·I·D·A·Y</div>
             <div class="header-sep"></div>
             <div class="topbar-sub">OSINT DASHBOARD</div>
+            <button id="btn-graphe" class="btn-graphe">⬡ GRAPHE</button>
+            <button id="btn-stats" class="btn-graphe">📊 STATS</button>
+            <button id="btn-timeline-global" class="btn-graphe">⏱ TIMELINE</button>
+            <button id="btn-carte" class="btn-graphe">🗺 CARTE</button>
+        </div>
+        <div class="header-search">
+            <span class="search-global-icon">⌕</span>
+            <input type="text" id="global-search" placeholder="Recherche globale...">
+            <div id="global-search-results" class="global-search-results"></div>
         </div>
         <div class="header-center">
             <span id="clock"></span>
@@ -48,11 +61,20 @@
                 <input type="text" id="search" placeholder="Rechercher...">
             </div>
 
+            <div class="filtres-wrap">
+                <button class="filtre-btn active" data-filtre="tous">TOUS</button>
+                <button class="filtre-btn" data-filtre="low">🟢</button>
+                <button class="filtre-btn" data-filtre="medium">🟡</button>
+                <button class="filtre-btn" data-filtre="high">🔴</button>
+                <button class="filtre-btn" data-filtre="date">DATE</button>
+            </div>
+
             <ul id="cible-list" class="cible-list"></ul>
 
             <button id="btn-nouvelle-cible" class="btn-new">
                 <span>+</span> NOUVELLE CIBLE
             </button>
+            <div class="tags-filtres" id="tags-filtres"></div>
         </aside>
 
         <!-- MAIN -->
@@ -118,6 +140,7 @@
                                 <span class="risk-dot" id="risk-dot"></span>
                                 <span id="risk-label">-</span>
                             </div>
+                            <div id="tags-wrap" class="tags-wrap"></div>
                         </div>
                         <div class="dossier-actions">
                             <button class="btn-action btn-edit-cible">✎ MODIFIER</button>
@@ -200,6 +223,113 @@
                 </div>
             </section>
         </main>
+        <!-- PANNEAU GRAPHE -->
+        <div id="graphe-panel" class="graphe-panel" style="display:none">
+            <div class="graphe-toolbar">
+                <div class="graphe-toolbar-left">
+                    <span class="section-label">// GRAPHE DE RELATIONS</span>
+                </div>
+                <div class="graphe-toolbar-right">
+                    <button id="btn-add-relation" class="btn-action">+ RELATION</button>
+                    <button id="btn-close-graphe" class="btn-action">✕ FERMER</button>
+                </div>
+            </div>
+            <svg id="graphe-svg"></svg>
+            <div id="graphe-tooltip" class="graphe-tooltip"></div>
+        </div>
+
+        <!-- PANNEAU STATS -->
+        <div id="stats-panel" class="graphe-panel" style="display:none">
+            <div class="graphe-toolbar">
+                <div class="graphe-toolbar-left">
+                    <span class="section-label">// STATISTIQUES</span>
+                </div>
+                <div class="graphe-toolbar-right">
+                    <button id="btn-close-stats" class="btn-action">✕ FERMER</button>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-title">RÉPARTITION DES RISQUES</div>
+                    <canvas id="chart-risques"></canvas>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">CIBLES PAR TAG</div>
+                    <canvas id="chart-tags"></canvas>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">ÉVÉNEMENTS PAR TYPE</div>
+                    <canvas id="chart-timeline"></canvas>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">APERÇU GLOBAL</div>
+                    <div id="stats-overview" class="stats-overview"></div>
+                </div>
+            </div>
+        </div>
+        <!-- PANNEAU TIMELINE GLOBALE -->
+        <div id="timeline-global-panel" class="graphe-panel" style="display:none">
+            <div class="graphe-toolbar">
+                <div class="graphe-toolbar-left">
+                    <span class="section-label">// TIMELINE GLOBALE</span>
+                </div>
+                <div class="graphe-toolbar-right">
+                    <div class="timeline-global-filtres">
+                        <button class="tg-filtre active" data-type="tous">TOUS</button>
+                        <button class="tg-filtre" data-type="info">INFO</button>
+                        <button class="tg-filtre" data-type="alert">ALERTE</button>
+                        <button class="tg-filtre" data-type="action">ACTION</button>
+                        <button class="tg-filtre" data-type="contact">CONTACT</button>
+                    </div>
+                    <button id="btn-close-timeline-global" class="btn-action">✕ FERMER</button>
+                </div>
+            </div>
+            <div id="timeline-global-list" class="timeline-global-list"></div>
+        </div>
+        <!-- PANNEAU CARTE -->
+        <div id="carte-panel" class="graphe-panel" style="display:none">
+            <div class="graphe-toolbar">
+                <div class="graphe-toolbar-left">
+                    <span class="section-label">// CARTE GÉOGRAPHIQUE</span>
+                </div>
+                <div class="graphe-toolbar-right">
+                    <button id="btn-close-carte" class="btn-action">✕ FERMER</button>
+                </div>
+            </div>
+            <div id="carte-map" style="flex:1;"></div>
+        </div>
+
+
+        <!-- MODAL RELATION -->
+        <div id="modal-relation" class="modal-overlay">
+            <div class="modal-box">
+                <div class="modal-title">NOUVELLE RELATION</div>
+                <button id="modal-relation-close" class="modal-close">✕</button>
+                <div class="field">
+                    <label>CIBLE SOURCE</label>
+                    <select id="relation-source" class="relation-select"></select>
+                </div>
+                <div class="field">
+                    <label>CIBLE CIBLE</label>
+                    <select id="relation-target" class="relation-select"></select>
+                </div>
+                <div class="field">
+                    <label>TYPE DE RELATION</label>
+                    <select id="relation-type" class="relation-select">
+                        <option value="famille">FAMILLE</option>
+                        <option value="associe">ASSOCIÉ</option>
+                        <option value="employeur">EMPLOYEUR</option>
+                        <option value="contact">CONTACT</option>
+                        <option value="suspect">SUSPECT</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>DESCRIPTION</label>
+                    <input type="text" id="relation-desc" placeholder="Ex: Frère, PDG de...">
+                </div>
+                <button id="btn-save-relation" class="btn-login">CRÉER LE LIEN</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL NOUVELLE CIBLE -->
@@ -223,6 +353,10 @@
                 <div class="field">
                     <label>TÉLÉPHONE</label>
                     <input type="text" id="input-tel" placeholder="06 00 00 00 00">
+                </div>
+                <div class="field">
+                    <label>VILLE / ADRESSE</label>
+                    <input type="text" id="input-ville" placeholder="Paris, France">
                 </div>
                 <button type="submit" class="btn-login">CRÉER LE DOSSIER</button>
             </form>
@@ -250,7 +384,38 @@
     <!-- Bouton pour ouvrir le widget -->
     <button id="friday-fab" class="friday-fab">⬡ FRIDAY</button>
 
-    <script src="dashboard.js"></script>
+    <!-- MODAL MODIFIER CIBLE -->
+    <div id="modal-edit" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">MODIFIER LA CIBLE</div>
+            <button id="modal-edit-close" class="modal-close">✕</button>
+            <form id="form-edit-cible">
+                <div class="field">
+                    <label>NOM</label>
+                    <input type="text" id="edit-nom" placeholder="Dupont">
+                </div>
+                <div class="field">
+                    <label>PRÉNOM</label>
+                    <input type="text" id="edit-prenom" placeholder="Jean">
+                </div>
+                <div class="field">
+                    <label>EMAIL</label>
+                    <input type="text" id="edit-email" placeholder="jean@example.com">
+                </div>
+                <div class="field">
+                    <label>TÉLÉPHONE</label>
+                    <input type="text" id="edit-tel" placeholder="06 00 00 00 00">
+                </div>
+                <div class="field">
+                    <label>VILLE / ADRESSE</label>
+                    <input type="text" id="edit-ville" placeholder="Paris, France">
+                </div>
+                <button type="submit" class="btn-login">SAUVEGARDER</button>
+            </form>
+        </div>
+        <script src="dashboard.js"></script>
+    </div>
+
 </body>
 
 </html>
