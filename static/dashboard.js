@@ -140,13 +140,30 @@ function renderCibles() {
     const search = document.getElementById('search').value.toLowerCase();
     list.innerHTML = '';
 
-    const filtered = cibles.filter(c =>
+    let filtered = cibles.filter(c =>
         (c.nom + ' ' + c.prenom).toLowerCase().includes(search)
     );
+
+    // Filtre par risque
+    if (filtreActif !== 'tous') {
+        filtered = filtered.filter(c => calculateRisk(c).level === filtreActif);
+    }
+
+    // Filtre par tag
+    if (filtreTag) {
+        filtered = filtered.filter(c => (c.tags || []).includes(filtreTag));
+    }
+
+    // Tri par date
+    if (triDate) {
+        filtered = [...filtered].sort((a, b) => b.id - a.id);
+    }
 
     document.getElementById('compteur-cibles').textContent = cibles.length;
 
     filtered.forEach(c => {
+        const risk = calculateRisk(c);
+        const riskColors = { low: '#00e87a', medium: '#ffa500', high: '#ff3333' };
         const li = document.createElement('li');
         li.className = 'cible-item' + (c.id === activeCibleId ? ' active' : '');
         li.dataset.id = c.id;
@@ -155,7 +172,10 @@ function renderCibles() {
                 <div class="cible-nom">${c.nom.toUpperCase()}</div>
                 <div class="cible-prenom">${c.prenom}</div>
             </div>
-            <button class="btn-supprimer-item" data-id="${c.id}">✕</button>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="width:6px;height:6px;border-radius:50%;background:${riskColors[risk.level]};display:inline-block;"></span>
+                <button class="btn-supprimer-item" data-id="${c.id}">✕</button>
+            </div>
         `;
         li.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-supprimer-item')) return;
@@ -183,6 +203,7 @@ function openDossier(id) {
     document.getElementById('d-email').textContent = c.email || '—';
     document.getElementById('d-tel').textContent = c.telephone || '—';
     document.getElementById('notes-area').value = c.notes || '';
+    document.getElementById('edit-ville').value = c.ville || '';
 
     // Champs extra — nettoyer d'abord
     const table = document.getElementById('infos-table');
@@ -210,6 +231,7 @@ function openDossier(id) {
     renderCibles();
     renderTimeline(c);
     updateRiskBadge(c);
+    renderTags(c);
     renderHistorique(c);
 
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -298,12 +320,15 @@ document.getElementById('form-cible').addEventListener('submit', e => {
         prenom: document.getElementById('input-prenom').value.trim(),
         email: document.getElementById('input-email').value.trim(),
         telephone: document.getElementById('input-tel').value.trim(),
+        ville: document.getElementById('input-ville').value.trim(),
         reseaux: [],
         fichiers: [],
         notes: ''
     };
     if (!newCible.nom) return;
     cibles.push(newCible);
+    const doublons = checkDoublons(newCible);
+    showDoublonsAlert(doublons);
     saveCibles();
     addHistorique(newCible, `Dossier créé — ${newCible.prenom} ${newCible.nom}`);
     renderCibles();
@@ -686,6 +711,1039 @@ widgetLog('Système Friday initialisé.', 'system');
 widgetLog('Tapez une commande ou posez une question.', 'system');
 drawWidgetOrb();
 listenNtfy();
+
+// ============ GRAPHE DE RELATIONS ============
+
+// Stockage des relations
+let relations = JSON.parse(localStorage.getItem('friday-relations') || '[]');
+
+function saveRelations() {
+    localStorage.setItem('friday-relations', JSON.stringify(relations));
+}
+
+// Couleurs par type de relation
+const RELATION_COLORS = {
+    famille: '#00e87a',
+    associe: '#00d4ff',
+    employeur: '#ffa500',
+    contact: '#7ab8cc',
+    suspect: '#ff3333'
+};
+
+// Toggle graphe
+document.getElementById('btn-graphe').addEventListener('click', () => {
+    document.getElementById('graphe-panel').style.display = 'flex';
+    document.getElementById('btn-graphe').classList.add('active');
+    renderGraphe();
+});
+
+document.getElementById('btn-close-graphe').addEventListener('click', () => {
+    document.getElementById('graphe-panel').style.display = 'none';
+    document.getElementById('btn-graphe').classList.remove('active');
+});
+
+// Modal relation
+document.getElementById('btn-add-relation').addEventListener('click', () => {
+    const sourceSelect = document.getElementById('relation-source');
+    const targetSelect = document.getElementById('relation-target');
+    sourceSelect.innerHTML = '';
+    targetSelect.innerHTML = '';
+    cibles.forEach(c => {
+        const opt1 = document.createElement('option');
+        opt1.value = c.id;
+        opt1.textContent = `${c.nom} ${c.prenom}`;
+        sourceSelect.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = c.id;
+        opt2.textContent = `${c.nom} ${c.prenom}`;
+        targetSelect.appendChild(opt2);
+    });
+    document.getElementById('modal-relation').classList.add('active');
+});
+
+document.getElementById('modal-relation-close').addEventListener('click', () => {
+    document.getElementById('modal-relation').classList.remove('active');
+});
+
+document.getElementById('btn-save-relation').addEventListener('click', () => {
+    const source = document.getElementById('relation-source').value;
+    const target = document.getElementById('relation-target').value;
+    const type = document.getElementById('relation-type').value;
+    const desc = document.getElementById('relation-desc').value.trim();
+    const editId = document.getElementById('btn-save-relation').dataset.editId;
+
+    if (source === target) {
+        alert('Source et cible ne peuvent pas être identiques.');
+        return;
+    }
+
+    if (editId) {
+        // Mode édition
+        const rel = relations.find(r => r.id === parseInt(editId));
+        if (rel) {
+            rel.source = parseInt(source);
+            rel.target = parseInt(target);
+            rel.type = type;
+            rel.desc = desc;
+        }
+        delete document.getElementById('btn-save-relation').dataset.editId;
+        document.getElementById('btn-save-relation').textContent = 'CRÉER LE LIEN';
+    } else {
+        // Mode création
+        relations.push({
+            id: Date.now(),
+            source: parseInt(source),
+            target: parseInt(target),
+            type: type,
+            desc: desc
+        });
+    }
+
+    saveRelations();
+    document.getElementById('modal-relation').classList.remove('active');
+    document.getElementById('relation-desc').value = '';
+    renderGraphe();
+});
+// Rendu D3
+function renderGraphe() {
+    const svg = d3.select('#graphe-svg');
+    svg.selectAll('*').remove();
+
+    const w = document.getElementById('graphe-svg').clientWidth;
+    const h = document.getElementById('graphe-svg').clientHeight;
+
+    // Fond grille
+    const defs = svg.append('defs');
+    const pattern = defs.append('pattern')
+        .attr('id', 'grid')
+        .attr('width', 40).attr('height', 40)
+        .attr('patternUnits', 'userSpaceOnUse');
+    pattern.append('path')
+        .attr('d', 'M 40 0 L 0 0 0 40')
+        .attr('fill', 'none')
+        .attr('stroke', '#0d2535')
+        .attr('stroke-width', 0.5);
+    svg.append('rect')
+        .attr('width', w).attr('height', h)
+        .attr('fill', 'url(#grid)');
+
+    // Flèche
+    defs.append('marker')
+        .attr('id', 'arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 28).attr('refY', 0)
+        .attr('markerWidth', 6).attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', '#0077aa');
+
+    // Nodes et liens
+    const nodes = cibles.map(c => ({
+        id: c.id,
+        nom: c.nom,
+        prenom: c.prenom,
+        risk: calculateRisk(c).level
+    }));
+
+    const links = relations.filter(r =>
+        nodes.find(n => n.id === r.source) &&
+        nodes.find(n => n.id === r.target)
+    ).map(r => ({ ...r }));
+
+    // Simulation D3
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links)
+            .id(d => d.id)
+            .distance(160))
+        .force('charge', d3.forceManyBody().strength(-400))
+        .force('center', d3.forceCenter(w / 2, h / 2))
+        .force('collision', d3.forceCollide(50));
+
+    // Liens
+    const link = svg.append('g')
+        .selectAll('line')
+        .data(links)
+        .enter().append('line')
+        .attr('stroke', d => RELATION_COLORS[d.type] || '#0077aa')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-opacity', 0.6)
+        .attr('marker-end', 'url(#arrow)');
+
+    // Labels liens
+    const linkLabel = svg.append('g')
+        .selectAll('text')
+        .data(links)
+        .enter().append('text')
+        .attr('fill', d => RELATION_COLORS[d.type] || '#0077aa')
+        .attr('font-size', '9px')
+        .attr('font-family', 'Courier New')
+        .attr('text-anchor', 'middle')
+        .attr('opacity', 0.7)
+        .text(d => d.type.toUpperCase());
+
+    // Bouton supprimer lien
+    // Bouton supprimer + modifier lien
+    const linkActions = svg.append('g')
+        .selectAll('g')
+        .data(links)
+        .enter().append('g')
+        .attr('opacity', 0)
+        .on('mouseover', function () { d3.select(this).attr('opacity', 1); })
+        .on('mouseout', function () { d3.select(this).attr('opacity', 0); });
+
+    // Bouton supprimer
+    linkActions.append('text')
+        .attr('fill', '#ff3333')
+        .attr('font-size', '11px')
+        .attr('text-anchor', 'middle')
+        .attr('cursor', 'pointer')
+        .attr('dx', 10)
+        .text('✕')
+        .on('click', function (event, d) {
+            event.stopPropagation();
+            relations = relations.filter(r => r.id !== d.id);
+            saveRelations();
+            renderGraphe();
+        });
+
+    // Bouton modifier
+    linkActions.append('text')
+        .attr('fill', '#00d4ff')
+        .attr('font-size', '11px')
+        .attr('text-anchor', 'middle')
+        .attr('cursor', 'pointer')
+        .attr('dx', -10)
+        .text('✎')
+        .on('click', function (event, d) {
+            event.stopPropagation();
+            // Pré-remplir la modal avec les valeurs actuelles
+            const sourceSelect = document.getElementById('relation-source');
+            const targetSelect = document.getElementById('relation-target');
+            sourceSelect.innerHTML = '';
+            targetSelect.innerHTML = '';
+            cibles.forEach(c => {
+                const opt1 = document.createElement('option');
+                opt1.value = c.id;
+                opt1.textContent = `${c.nom} ${c.prenom}`;
+                if (c.id === d.source.id) opt1.selected = true;
+                sourceSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = c.id;
+                opt2.textContent = `${c.nom} ${c.prenom}`;
+                if (c.id === d.target.id) opt2.selected = true;
+                targetSelect.appendChild(opt2);
+            });
+            document.getElementById('relation-type').value = d.type;
+            document.getElementById('relation-desc').value = d.desc || '';
+
+            // Passer en mode édition
+            document.getElementById('btn-save-relation').dataset.editId = d.id;
+            document.getElementById('btn-save-relation').textContent = 'MODIFIER LE LIEN';
+            document.getElementById('modal-relation').classList.add('active');
+        });
+
+    // Noeuds
+    const nodeColor = { low: '#00e87a', medium: '#ffa500', high: '#ff3333' };
+
+    const node = svg.append('g')
+        .selectAll('g')
+        .data(nodes)
+        .enter().append('g')
+        .attr('cursor', 'pointer')
+        .call(d3.drag()
+            .on('start', (event, d) => {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x; d.fy = d.y;
+            })
+            .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+            .on('end', (event, d) => {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null; d.fy = null;
+            })
+        )
+        .on('click', (event, d) => {
+            document.getElementById('graphe-panel').style.display = 'none';
+            document.getElementById('btn-graphe').classList.remove('active');
+            openDossier(d.id);
+        })
+        .on('mouseover', (event, d) => {
+            const tooltip = document.getElementById('graphe-tooltip');
+            tooltip.innerHTML = `
+                <strong style="color:#00d4ff">${d.nom} ${d.prenom}</strong><br>
+                Risque : ${calculateRisk(cibles.find(c => c.id === d.id)).label}
+            `;
+            tooltip.classList.add('visible');
+            tooltip.style.left = (event.pageX + 12) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        })
+        .on('mouseout', () => {
+            document.getElementById('graphe-tooltip').classList.remove('visible');
+        });
+
+    // Cercle extérieur (ring)
+    node.append('circle')
+        .attr('r', 28)
+        .attr('fill', 'none')
+        .attr('stroke', d => nodeColor[d.risk] || '#00d4ff')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,3')
+        .attr('opacity', 0.5);
+
+    // Cercle principal
+    node.append('circle')
+        .attr('r', 22)
+        .attr('fill', '#050f1c')
+        .attr('stroke', d => nodeColor[d.risk] || '#00d4ff')
+        .attr('stroke-width', 2);
+
+    // Initiales
+    node.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('fill', '#00d4ff')
+        .attr('font-family', 'Orbitron, monospace')
+        .attr('font-size', '11px')
+        .attr('font-weight', 'bold')
+        .text(d => d.nom[0].toUpperCase() + d.prenom[0].toUpperCase());
+
+    // Nom sous le nœud
+    node.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('y', 36)
+        .attr('fill', '#7ab8cc')
+        .attr('font-family', 'Courier New')
+        .attr('font-size', '9px')
+        .text(d => `${d.nom.toUpperCase()} ${d.prenom}`);
+
+    // Légende
+    const legende = svg.append('g').attr('transform', 'translate(20, ' + (h - 120) + ')');
+    Object.entries(RELATION_COLORS).forEach(([type, color], i) => {
+        legende.append('rect')
+            .attr('x', 0).attr('y', i * 18)
+            .attr('width', 20).attr('height', 3)
+            .attr('fill', color).attr('rx', 1);
+        legende.append('text')
+            .attr('x', 28).attr('y', i * 18 + 3)
+            .attr('fill', '#7ab8cc')
+            .attr('font-size', '9px')
+            .attr('font-family', 'Courier New')
+            .attr('dominant-baseline', 'middle')
+            .text(type.toUpperCase());
+    });
+
+    // Tick simulation
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        linkLabel
+            .attr('x', d => (d.source.x + d.target.x) / 2)
+            .attr('y', d => (d.source.y + d.target.y) / 2 - 8);
+
+        linkActions.attr('transform', d =>
+            `translate(${(d.source.x + d.target.x) / 2}, ${(d.source.y + d.target.y) / 2})`
+        );
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+}
+
+// ============ MODIFIER CIBLE ============
+document.getElementById('modal-edit-close').addEventListener('click', () => {
+    document.getElementById('modal-edit').classList.remove('active');
+});
+
+document.querySelector('.btn-edit-cible').addEventListener('click', () => {
+    const c = cibles.find(x => x.id === activeCibleId);
+    if (!c) return;
+
+    document.getElementById('edit-nom').value = c.nom;
+    document.getElementById('edit-prenom').value = c.prenom;
+    document.getElementById('edit-email').value = c.email || '';
+    document.getElementById('edit-tel').value = c.telephone || '';
+
+    document.getElementById('modal-edit').classList.add('active');
+});
+
+document.getElementById('form-edit-cible').addEventListener('submit', e => {
+    e.preventDefault();
+    const c = cibles.find(x => x.id === activeCibleId);
+    if (!c) return;
+
+    const oldNom = `${c.prenom} ${c.nom}`;
+
+    c.nom = document.getElementById('edit-nom').value.trim();
+    c.prenom = document.getElementById('edit-prenom').value.trim();
+    c.email = document.getElementById('edit-email').value.trim();
+    c.telephone = document.getElementById('edit-tel').value.trim();
+    c.ville = document.getElementById('edit-ville').value.trim();
+
+    saveCibles();
+    const doublons = checkDoublons(c);
+    showDoublonsAlert(doublons);
+    addHistorique(c, `Informations modifiées — anciennement : ${oldNom}`);
+    document.getElementById('modal-edit').classList.remove('active');
+    openDossier(c.id);
+    renderCibles();
+});
+
+// ============ RECHERCHE GLOBALE ============
+const globalSearch = document.getElementById('global-search');
+const globalResults = document.getElementById('global-search-results');
+
+globalSearch.addEventListener('input', function () {
+    const query = this.value.toLowerCase().trim();
+    globalResults.innerHTML = '';
+
+    if (query.length < 2) {
+        globalResults.classList.remove('visible');
+        return;
+    }
+
+    const matches = [];
+
+    cibles.forEach(c => {
+        const fields = [
+            { label: 'NOM', val: `${c.nom} ${c.prenom}` },
+            { label: 'EMAIL', val: c.email || '' },
+            { label: 'TÉL', val: c.telephone || '' },
+            { label: 'NOTES', val: c.notes || '' },
+        ];
+
+        // Champs extra
+        (c.champsExtra || []).forEach(ch => {
+            fields.push({ label: ch.cle.toUpperCase(), val: ch.val });
+        });
+
+        // Réseaux
+        (c.reseaux || []).forEach(r => {
+            fields.push({ label: r.type.toUpperCase(), val: r.url });
+        });
+
+        // Timeline
+        (c.timeline || []).forEach(t => {
+            fields.push({ label: 'TIMELINE', val: t.text });
+        });
+
+        fields.forEach(f => {
+            if (f.val && f.val.toLowerCase().includes(query)) {
+                matches.push({
+                    cible: c,
+                    label: f.label,
+                    val: f.val
+                });
+            }
+        });
+    });
+
+    // Dédoublonner par cible
+    const seen = new Set();
+    const unique = matches.filter(m => {
+        if (seen.has(m.cible.id + m.label)) return false;
+        seen.add(m.cible.id + m.label);
+        return true;
+    });
+
+    if (unique.length === 0) {
+        globalResults.innerHTML = '<div class="search-no-result">Aucun résultat</div>';
+        globalResults.classList.add('visible');
+        return;
+    }
+
+    unique.slice(0, 8).forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'search-result-item';
+        div.innerHTML = `
+            <div class="search-result-name">${m.cible.nom.toUpperCase()} ${m.cible.prenom}</div>
+            <div class="search-result-detail">${m.cible.email || '—'} · ${m.cible.telephone || '—'}</div>
+            <div class="search-result-match">Trouvé dans : ${m.label} — "${m.val.substring(0, 40)}${m.val.length > 40 ? '...' : ''}"</div>
+        `;
+        div.addEventListener('click', () => {
+            globalSearch.value = '';
+            globalResults.classList.remove('visible');
+            openDossier(m.cible.id);
+        });
+        globalResults.appendChild(div);
+    });
+
+    globalResults.classList.add('visible');
+});
+
+// Fermer les résultats en cliquant ailleurs
+document.addEventListener('click', e => {
+    if (!e.target.closest('.header-search')) {
+        globalResults.classList.remove('visible');
+    }
+});
+
+// ============ FILTRES ============
+let filtreActif = 'tous';
+let triDate = false;
+
+document.querySelectorAll('.filtre-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const filtre = this.dataset.filtre;
+
+        if (filtre === 'date') {
+            triDate = !triDate;
+            this.textContent = triDate ? 'DATE ↑' : 'DATE ↓';
+        } else {
+            filtreActif = filtre;
+            triDate = false;
+            document.querySelector('.filtre-btn[data-filtre="date"]').textContent = 'DATE';
+        }
+
+        renderCibles();
+    });
+});
+
+// ============ DÉTECTION DE DOUBLONS ============
+function checkDoublons(cible) {
+    const doublons = [];
+
+    cibles.forEach(c => {
+        if (c.id === cible.id) return;
+
+        if (cible.email && c.email &&
+            cible.email.toLowerCase() === c.email.toLowerCase()) {
+            doublons.push({
+                cible: c,
+                champ: 'EMAIL',
+                valeur: cible.email
+            });
+        }
+
+        if (cible.telephone && c.telephone &&
+            cible.telephone.replace(/\s/g, '') === c.telephone.replace(/\s/g, '')) {
+            doublons.push({
+                cible: c,
+                champ: 'TÉLÉPHONE',
+                valeur: cible.telephone
+            });
+        }
+
+        // Vérifier aussi les champs extra
+        (cible.champsExtra || []).forEach(ce => {
+            (c.champsExtra || []).forEach(ce2 => {
+                if (ce.cle.toLowerCase() === ce2.cle.toLowerCase() &&
+                    ce.val.toLowerCase() === ce2.val.toLowerCase()) {
+                    doublons.push({
+                        cible: c,
+                        champ: ce.cle.toUpperCase(),
+                        valeur: ce.val
+                    });
+                }
+            });
+        });
+    });
+
+    return doublons;
+}
+
+function showDoublonsAlert(doublons) {
+    if (doublons.length === 0) return;
+
+    const messages = doublons.map(d =>
+        `⚠️ ${d.champ} "${d.valeur}" déjà utilisé par ${d.cible.nom} ${d.cible.prenom}`
+    ).join('\n');
+
+    // Afficher dans une notification HUD
+    const notif = document.createElement('div');
+    notif.className = 'doublon-notif';
+    notif.innerHTML = `
+        <div class="doublon-notif-title">⚠️ DOUBLONS DÉTECTÉS</div>
+        ${doublons.map(d => `
+            <div class="doublon-notif-item">
+                <span class="doublon-champ">${d.champ}</span>
+                <span class="doublon-val">"${d.valeur}"</span>
+                <span class="doublon-cible">→ ${d.cible.nom.toUpperCase()} ${d.cible.prenom}</span>
+            </div>
+        `).join('')}
+        <button class="doublon-close">✕</button>
+    `;
+    document.body.appendChild(notif);
+
+    notif.querySelector('.doublon-close').addEventListener('click', () => notif.remove());
+    setTimeout(() => notif.remove(), 8000);
+}
+
+// ============ TAGS ============
+const TAGS_PREDEFINIS = [
+    { nom: 'POLITIQUE', classe: 'tag-politique' },
+    { nom: 'CRIMINEL', classe: 'tag-criminel' },
+    { nom: 'ENTREPRISE', classe: 'tag-entreprise' },
+    { nom: 'SUSPECT', classe: 'tag-suspect' },
+    { nom: 'CONTACT', classe: 'tag-contact' },
+    { nom: 'VIP', classe: 'tag-vip' },
+    { nom: 'ARCHIVE', classe: 'tag-archive' },
+];
+
+let filtreTag = null;
+
+function getTagClasse(nom) {
+    const predef = TAGS_PREDEFINIS.find(t => t.nom === nom.toUpperCase());
+    return predef ? predef.classe : 'tag-custom';
+}
+
+function renderTags(c) {
+    const wrap = document.getElementById('tags-wrap');
+    wrap.innerHTML = '';
+
+    (c.tags || []).forEach(tag => {
+        const span = document.createElement('span');
+        span.className = `tag ${getTagClasse(tag)}`;
+        span.innerHTML = `
+            ${tag}
+            <button class="tag-remove" onclick="removeTag('${tag}')">✕</button>
+        `;
+        wrap.appendChild(span);
+    });
+
+    // Bouton ajouter tag
+    const btn = document.createElement('button');
+    btn.className = 'btn-add-tag';
+    btn.textContent = '+ TAG';
+    btn.addEventListener('click', () => showTagPicker(c));
+    wrap.appendChild(btn);
+}
+
+function showTagPicker(c) {
+    // Supprimer picker existant
+    const existing = document.getElementById('tag-picker');
+    if (existing) { existing.remove(); return; }
+
+    const picker = document.createElement('div');
+    picker.id = 'tag-picker';
+    picker.style.cssText = `
+        position: absolute;
+        background: #050f1c;
+        border: 1px solid #0077aa;
+        padding: 8px;
+        z-index: 200;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        max-width: 240px;
+    `;
+
+    // Tags prédéfinis
+    TAGS_PREDEFINIS.forEach(t => {
+        if ((c.tags || []).includes(t.nom)) return;
+        const btn = document.createElement('button');
+        btn.className = `tag ${t.classe}`;
+        btn.style.cursor = 'pointer';
+        btn.textContent = t.nom;
+        btn.addEventListener('click', () => {
+            addTag(c, t.nom);
+            picker.remove();
+        });
+        picker.appendChild(btn);
+    });
+
+    // Tag custom
+    const input = document.createElement('input');
+    input.placeholder = 'Tag custom...';
+    input.style.cssText = `
+        background: transparent;
+        border: 1px dashed #0d2535;
+        color: #7ab8cc;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 10px;
+        padding: 4px 8px;
+        outline: none;
+        width: 100%;
+    `;
+    input.addEventListener('keypress', e => {
+        if (e.key === 'Enter' && input.value.trim()) {
+            addTag(c, input.value.trim().toUpperCase());
+            picker.remove();
+        }
+    });
+    picker.appendChild(input);
+
+    document.getElementById('tags-wrap').appendChild(picker);
+}
+
+function addTag(c, tag) {
+    if (!c.tags) c.tags = [];
+    if (c.tags.includes(tag)) return;
+    c.tags.push(tag);
+    saveCibles();
+    addHistorique(c, `Tag ajouté : ${tag}`);
+    renderTags(c);
+    renderTagsFiltres();
+    renderCibles();
+}
+
+window.removeTag = function (tag) {
+    const c = cibles.find(x => x.id === activeCibleId);
+    if (!c) return;
+    c.tags = (c.tags || []).filter(t => t !== tag);
+    saveCibles();
+    addHistorique(c, `Tag supprimé : ${tag}`);
+    renderTags(c);
+    renderTagsFiltres();
+    renderCibles();
+};
+
+function renderTagsFiltres() {
+    const wrap = document.getElementById('tags-filtres');
+    wrap.innerHTML = '';
+
+    // Récupérer tous les tags uniques
+    const allTags = [...new Set(cibles.flatMap(c => c.tags || []))];
+    if (allTags.length === 0) return;
+
+    allTags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'tag-filtre-btn' + (filtreTag === tag ? ' active' : '');
+        btn.textContent = tag;
+        btn.addEventListener('click', () => {
+            filtreTag = filtreTag === tag ? null : tag;
+            renderTagsFiltres();
+            renderCibles();
+        });
+        wrap.appendChild(btn);
+    });
+}
+
+// ============ STATISTIQUES ============
+Chart.defaults.color = '#7ab8cc';
+Chart.defaults.borderColor = '#0d2535';
+Chart.defaults.font.family = 'Courier New';
+
+let chartRisques = null;
+let chartTags = null;
+let chartTimeline = null;
+
+document.getElementById('btn-stats').addEventListener('click', () => {
+    document.getElementById('stats-panel').style.display = 'flex';
+    document.getElementById('btn-stats').classList.add('active');
+    renderStats();
+});
+
+document.getElementById('btn-close-stats').addEventListener('click', () => {
+    document.getElementById('stats-panel').style.display = 'none';
+    document.getElementById('btn-stats').classList.remove('active');
+});
+
+function renderStats() {
+    // Détruire les anciens charts
+    if (chartRisques) { chartRisques.destroy(); chartRisques = null; }
+    if (chartTags) { chartTags.destroy(); chartTags = null; }
+    if (chartTimeline) { chartTimeline.destroy(); chartTimeline = null; }
+
+    // ---- Données ----
+    const risques = { low: 0, medium: 0, high: 0 };
+    cibles.forEach(c => risques[calculateRisk(c).level]++);
+
+    const tagsCount = {};
+    cibles.forEach(c => (c.tags || []).forEach(t => {
+        tagsCount[t] = (tagsCount[t] || 0) + 1;
+    }));
+
+    const timelineTypes = { info: 0, alert: 0, action: 0, contact: 0 };
+    cibles.forEach(c => (c.timeline || []).forEach(e => {
+        if (timelineTypes[e.type] !== undefined) timelineTypes[e.type]++;
+    }));
+
+    // ---- Chart Risques ----
+    chartRisques = new Chart(document.getElementById('chart-risques'), {
+        type: 'doughnut',
+        data: {
+            labels: ['FAIBLE', 'MODÉRÉ', 'ÉLEVÉ'],
+            datasets: [{
+                data: [risques.low, risques.medium, risques.high],
+                backgroundColor: ['#00e87a33', '#ffa50033', '#ff333333'],
+                borderColor: ['#00e87a', '#ffa500', '#ff3333'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { color: '#7ab8cc', font: { size: 10 } }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+
+    // ---- Chart Tags ----
+    const tagLabels = Object.keys(tagsCount);
+    const tagValues = Object.values(tagsCount);
+
+    chartTags = new Chart(document.getElementById('chart-tags'), {
+        type: 'bar',
+        data: {
+            labels: tagLabels,
+            datasets: [{
+                data: tagValues,
+                backgroundColor: '#00d4ff22',
+                borderColor: '#00d4ff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    ticks: { color: '#7ab8cc', font: { size: 9 } },
+                    grid: { color: '#0d2535' }
+                },
+                y: {
+                    ticks: { color: '#7ab8cc', font: { size: 9 }, stepSize: 1 },
+                    grid: { color: '#0d2535' }
+                }
+            }
+        }
+    });
+
+    // ---- Chart Timeline ----
+    chartTimeline = new Chart(document.getElementById('chart-timeline'), {
+        type: 'polarArea',
+        data: {
+            labels: ['INFO', 'ALERTE', 'ACTION', 'CONTACT'],
+            datasets: [{
+                data: [
+                    timelineTypes.info,
+                    timelineTypes.alert,
+                    timelineTypes.action,
+                    timelineTypes.contact
+                ],
+                backgroundColor: [
+                    '#00d4ff22', '#ff333322',
+                    '#ffa50022', '#00e87a22'
+                ],
+                borderColor: [
+                    '#00d4ff', '#ff3333',
+                    '#ffa500', '#00e87a'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: { color: '#7ab8cc', font: { size: 10 } }
+                }
+            }
+        }
+    });
+
+    // ---- Overview ----
+    const totalTimeline = Object.values(timelineTypes).reduce((a, b) => a + b, 0);
+    const totalRelations = relations.length;
+    const totalFichiers = cibles.reduce((a, c) => a + (c.fichiers?.length || 0), 0);
+    const totalReseaux = cibles.reduce((a, c) => a + (c.reseaux?.length || 0), 0);
+
+    document.getElementById('stats-overview').innerHTML = `
+        <div class="stat-overview-item">
+            <span class="stat-overview-label">TOTAL CIBLES</span>
+            <span class="stat-overview-value">${cibles.length}</span>
+        </div>
+        <div class="stat-overview-item">
+            <span class="stat-overview-label">RELATIONS</span>
+            <span class="stat-overview-value">${totalRelations}</span>
+        </div>
+        <div class="stat-overview-item">
+            <span class="stat-overview-label">ÉVÉNEMENTS</span>
+            <span class="stat-overview-value">${totalTimeline}</span>
+        </div>
+        <div class="stat-overview-item">
+            <span class="stat-overview-label">FICHIERS</span>
+            <span class="stat-overview-value">${totalFichiers}</span>
+        </div>
+        <div class="stat-overview-item">
+            <span class="stat-overview-label">RÉSEAUX</span>
+            <span class="stat-overview-value">${totalReseaux}</span>
+        </div>
+    `;
+}
+
+// ============ TIMELINE GLOBALE ============
+let tgFiltre = 'tous';
+
+document.getElementById('btn-timeline-global').addEventListener('click', () => {
+    document.getElementById('timeline-global-panel').style.display = 'flex';
+    document.getElementById('btn-timeline-global').classList.add('active');
+    renderTimelineGlobale();
+});
+
+document.getElementById('btn-close-timeline-global').addEventListener('click', () => {
+    document.getElementById('timeline-global-panel').style.display = 'none';
+    document.getElementById('btn-timeline-global').classList.remove('active');
+});
+
+document.querySelectorAll('.tg-filtre').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.tg-filtre').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        tgFiltre = this.dataset.type;
+        renderTimelineGlobale();
+    });
+});
+
+function renderTimelineGlobale() {
+    const list = document.getElementById('timeline-global-list');
+    list.innerHTML = '';
+
+    // Collecter tous les événements de toutes les cibles
+    let events = [];
+    cibles.forEach(c => {
+        (c.timeline || []).forEach(e => {
+            events.push({
+                ...e,
+                cible: c
+            });
+        });
+    });
+
+    // Filtrer par type
+    if (tgFiltre !== 'tous') {
+        events = events.filter(e => e.type === tgFiltre);
+    }
+
+    // Trier par date décroissante
+    events.sort((a, b) => b.date - a.date);
+
+    if (events.length === 0) {
+        list.innerHTML = '<div class="tg-empty">Aucun événement dans la timeline globale.</div>';
+        return;
+    }
+
+    events.forEach((evt, i) => {
+        const side = i % 2 === 0 ? 'left' : 'right';
+        const date = new Date(evt.date).toLocaleString('fr-FR');
+
+        const div = document.createElement('div');
+        div.className = `tg-item ${side}`;
+        div.innerHTML = `
+            <div class="tg-dot ${evt.type}"></div>
+            <div class="tg-content" data-cible-id="${evt.cible.id}">
+                <div class="tg-content-date">${date}</div>
+                <div class="tg-content-cible">${evt.cible.nom.toUpperCase()} ${evt.cible.prenom}</div>
+                <span class="tg-content-type ${evt.type}">${evt.type.toUpperCase()}</span>
+                <div class="tg-content-text">${evt.text}</div>
+            </div>
+        `;
+
+        div.querySelector('.tg-content').addEventListener('click', () => {
+            document.getElementById('timeline-global-panel').style.display = 'none';
+            document.getElementById('btn-timeline-global').classList.remove('active');
+            openDossier(evt.cible.id);
+        });
+
+        list.appendChild(div);
+    });
+}
+
+// ============ CARTE GÉOGRAPHIQUE ============
+let carteMap = null;
+let carteMarkers = [];
+
+document.getElementById('btn-carte').addEventListener('click', () => {
+    document.getElementById('carte-panel').style.display = 'flex';
+    document.getElementById('btn-carte').classList.add('active');
+    setTimeout(() => initCarte(), 100);
+});
+
+document.getElementById('btn-close-carte').addEventListener('click', () => {
+    document.getElementById('carte-panel').style.display = 'none';
+    document.getElementById('btn-carte').classList.remove('active');
+});
+
+function initCarte() {
+    if (!carteMap) {
+        carteMap = L.map('carte-map', {
+            center: [46.5, 2.5],
+            zoom: 5,
+            zoomControl: true
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(carteMap);
+    }
+
+    carteMap.invalidateSize();
+    renderCarteMarkers();
+}
+
+function renderCarteMarkers() {
+    // Supprimer anciens markers
+    carteMarkers.forEach(m => m.remove());
+    carteMarkers = [];
+
+    const riskColors = { low: '#00e87a', medium: '#ffa500', high: '#ff3333' };
+
+    cibles.forEach(c => {
+        if (!c.ville) return;
+
+        // Géocoder la ville via Nominatim
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(c.ville)}&format=json&limit=1`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data || data.length === 0) return;
+
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                const risk = calculateRisk(c);
+                const color = riskColors[risk.level] || '#00d4ff';
+
+                // Icône custom HUD
+                const icon = L.divIcon({
+                    className: '',
+                    html: `
+                        <div style="
+                            width: 14px; height: 14px;
+                            border-radius: 50%;
+                            background: ${color};
+                            border: 2px solid ${color};
+                            box-shadow: 0 0 8px ${color};
+                            cursor: pointer;
+                        "></div>
+                    `,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+
+                const marker = L.marker([lat, lon], { icon })
+                    .addTo(carteMap)
+                    .bindPopup(`
+                        <div class="carte-popup">
+                            <div class="carte-popup-nom">${c.nom.toUpperCase()} ${c.prenom}</div>
+                            <div class="carte-popup-detail">${c.ville}</div>
+                            <div class="carte-popup-detail">${risk.label}</div>
+                            <button class="carte-popup-btn" onclick="
+                                document.getElementById('carte-panel').style.display='none';
+                                document.getElementById('btn-carte').classList.remove('active');
+                                openDossier(${c.id});
+                            ">OUVRIR LE DOSSIER</button>
+                        </div>
+                    `, { className: '' });
+
+                carteMarkers.push(marker);
+
+                // Sauvegarder les coords pour éviter de re-géocoder
+                c.coords = { lat, lon };
+                saveCibles();
+            })
+            .catch(() => { });
+    });
+}
 
 // ============ INIT ============
 renderCibles();
